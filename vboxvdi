@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import os
+#import yaml
 import sys
 import subprocess
 import shlex
@@ -11,6 +12,9 @@ import virtualbox.library
 import virtualbox.library_ext
 import virtualbox.pool
 import re
+
+
+
 
 
 pool = re.compile(r'\d+$')
@@ -24,8 +28,122 @@ VBOXMANAGE = "/usr/bin/vboxmanage"
 
 class vboxvdi:
     def __init__(self):
-        pass
+        self.initsize = 5
+        self.freesize = 2
+        self.maxcount = 10
+        self.mylist = []
+        self.cpu_count   = 2
+        self.memory_size = 2048
+        self.data_dir = "/VDI"
+        self.beginning_port = 5000
+        self.current_port   = self.beginning_port
+
+        self.vbox = virtualbox.VirtualBox()
+        self.mgr  = virtualbox.Manager()
+
+        self.print_vbox_info()
+
+        self.__define_lock_types()
+        self.get_base_image()
+        self.clone_base_image()
+        self.get_session()
+        self.set_clone_settings()
+        self.take_snapshot()
+
+    def __define_lock_types(self):
+        SHARED_LOCK = LockType(1)
+        WRITE_LOCK  = LockType(2)
+        VM_LOCK = virtualbox.library.LockType(3)
+
+        SHARED_LOCK = LockType.shared
+        WRITE_LOCK  = LockType.write
+
+        self.LOCKTYPE = SHARED_LOCK
+
+    # Does defined BASE vm exist?
+    def get_base_image(self):
+        
+        [self.mylist.append(vm.name) for vm in self.vbox.machines]
+
+        if BASE not in self.mylist:
+            print ("ERROR: base machine missing: %s" % BASE)
+            sys.exit()
+
+        self.BASE = self.vbox.find_machine(BASE)
+
+        self.print_base_image_info()
+
+    def print_vbox_info(self):
+        print ("")
+        print ("VirtualBox Info:")
+        print ("  - version: %s" % self.vbox.version)
+
+    def print_base_image_info(self):
+        print ("")
+        print ("Base Image Info:")
+        print ("  - (%s)" % self.BASE.name)
+        print ("  - (%s)" % self.BASE.state)
+        print ("  - (%s)" % self.BASE.vrde_server)
+        print ("  - cpu_count: (%s)" % self.BASE.cpu_count)
+        print ("  - current_state_modified: (%s)" % self.BASE.current_state_modified)
+
+    def print_clone_info(self):
+        print ("")
+        print ("  - Name:         %s"  % self.clone.name)
+        print ("  - State;        %s"  % self.session.state)
+        print ("  - memory_size:  %sM" % self.clone.memory_size)
+        print ("  - cpu_count:    %s"  % self.clone.cpu_count)
+        print ("  - OS:           %s"  % self.clone.os_type_id)
+        print ("  - Snapshots:    %s"  % self.clone.snapshot_count)
     
+    def clone_base_image(self):
+        print ("") 
+        print ("Begin cloning:")
+        self.state   = virtualbox.library.CloneMode(1)
+        self.options = virtualbox.library.CloneOptions(1)
+
+        self.clone = virtualbox.library.IMachine.clone(self.BASE, mode=self.state,
+                                          basefolder=self.data_dir) #, groups=["/New group/pool"])
+
+    def get_session(self):
+        self.session = self.mgr.get_session()
+
+        self.clone.lock_machine(self.session, self.LOCKTYPE)
+        self.console = self.session.console
+
+    def set_clone_settings(self):
+        self.print_clone_info()
+        vrde    = self.session.machine.vrde_server
+
+        vrde.set_vrde_property("TCP/Ports", "%s" % self.current_port)
+        self.current_port += 1
+
+        #    session.machine.groups = "/pool"
+        self.session.machine.memory_size = self.memory_size
+        self.session.machine.cpu_count   = self.cpu_count
+
+        self.session.machine.save_settings()
+        self.print_clone_info()
+
+    def take_snapshot(self):
+        print "Taking snapshot: ", self.session.machine.current_snapshot
+
+        x, p = self.session.machine.take_snapshot("test1", "test2", True)
+
+        print "waiting"
+
+        try:
+            p.wait_for_completion(10)
+        except:
+            pass
+
+        self.session.unlock_machine()
+    
+        if 0:
+            self.clone.launch_vm_process(session=self.session, type_p="headless")
+        else:
+            self.clone.launch_vm_process(type_p="headless")
+
     def runme(self):
         pass
 
@@ -45,10 +163,12 @@ def mygo():
     freesize = 2
     maxcount = 10
     mylist = []
+    cpu_count   = 2
+    memory_size = 2048
+
 
     vbox = virtualbox.VirtualBox()
     mgr  = virtualbox.Manager()
-
 
     SHARED_LOCK = LockType(1)
     WRITE_LOCK  = LockType(2)
@@ -74,7 +194,6 @@ def mygo():
     print "  - version: %s" % vbox.version
     print "  - version: %s" % vbox.version_normalized
 
-    
 
     print
     print "Base Image Info:"
@@ -89,10 +208,14 @@ def mygo():
     state   = virtualbox.library.CloneMode(1)
     options = virtualbox.library.CloneOptions(1)
 
-    a = virtualbox.library.IMachine.clone(MYBASE, mode=state)
+    a = virtualbox.library.IMachine.clone(MYBASE, mode=state,
+                                          basefolder="/VDI", groups=["/New group/pool"])
 
-    vbox1 = virtualbox.VirtualBox()
-    a = vbox1.find_machine(a.name)
+
+##    vbox1 = virtualbox.VirtualBox()
+##    a = vbox1.find_machine(a.name)
+
+#    a.unregister(virtualbox.library.CleanupMode(1))
 
     session = mgr.get_session()
 
@@ -100,24 +223,32 @@ def mygo():
     a.lock_machine(session, MYLOCK)
     console = session.console
 
-    print session.state
 
+    print "  - State;        %s"  % session.state
+    print "  - memory_size:  %sM" % a.memory_size
+    print "  - cpu_count:    %s"  % a.cpu_count
+    print "  - OS:           %s"  % a.os_type_id
+    print "  - Snapshots:    %s"  % a.snapshot_count
     
+    print 
+    print "Configuring machine"
     #
     # Make system changes
-    vrde    = a.vrde_server
-    print vrde.vrde_properties
+    vrde    = session.machine.vrde_server
 
-    ports = vrde.get_vrde_property("TCP/Ports")
-    print ports
+    vrde.set_vrde_property("TCP/Ports", "%s" % 5567)
+
+#    session.machine.groups = "/pool"
+    session.machine.memory_size = memory_size
+    session.machine.cpu_count = cpu_count
 
     session.machine.save_settings()
-    vrde.set_vrde_property("TCP/Ports", "5555")
 
-    ports = vrde.get_vrde_property("TCP/Ports")
-    print ports
-
-
+    print "  - State;        %s"  % session.state
+    print "  - memory_size:  %sM" % a.memory_size
+    print "  - cpu_count:    %s"  % a.cpu_count
+    print "  - OS:           %s"  % a.os_type_id
+    print "  - Snapshots:    %s" % a.snapshot_count
     time.sleep (5)
 
     
@@ -135,15 +266,11 @@ def mygo():
     except:
         pass
 
-    print "session.name = ", session.name
 
-    print x
- 
-#    session.unlock_machine()
+    session.unlock_machine()
 
+    a.launch_vm_process(type_p="headless")
 
-    print "Configuring machine"
-    a.virtualbox.library.IVRDEServer.set_vrde_property(port, 4444)
 
     sys.exit()
 
@@ -236,7 +363,7 @@ def mygo():
 #        vms = manage.manager("list", "vms")
         #vm = vbox.find_machine('testing002')
 
-mygo()
-    
-        
-         
+#mygo()
+
+if __name__ == "__main__":
+    a = vboxvdi()
