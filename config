@@ -1,0 +1,6 @@
+init = 5
+free = 2
+max  = 20
+
+#
+other = 0

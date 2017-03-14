@@ -1,0 +1,155 @@
+#!/usr/bin/python
+
+import os
+import sys
+import subprocess
+import shlex
+import virtualbox
+import virtualbox.library
+import virtualbox.library_ext
+import virtualbox.pool
+import re
+
+
+pool = re.compile(r'\d+$')
+BASE   = "testing"
+BASE   = "tetsing"
+BASE   = "testclone"
+PREFIX = re.compile(r"^%s Clone" % BASE)
+
+
+VBOXMANAGE = "/usr/bin/vboxmanage"
+
+class vboxvdi:
+    def __init__(self):
+        pass
+    
+    def runme(self):
+        pass
+
+    def vmcount(self, vmprefix):
+        cmd = VBOXMANAGE + "list vms"
+        cmd = shlex.split(cmd)
+##        while subprocess.Popen(cmd, stdout=subprocess.PIPE) as proc:
+##            print proc.stdout.read()
+
+
+def clonevm():
+    print ("cloning machine")
+     
+
+def mygo():
+    initsize = 5
+    freesize = 2
+    maxcount = 10
+    mylist = []
+
+    vbox = virtualbox.VirtualBox()
+
+    # Does defined BASE vm exist?
+    [mylist.append(vm.name) for vm in vbox.machines]
+    if BASE not in mylist:
+        print ("ERROR: base machine missing")
+        sys.exit()
+
+    MYBASE = vbox.find_machine(BASE)
+    print vbox.version
+    print vbox.version_normalized
+    print "(%s)" % MYBASE.name
+    print "(%s)" % MYBASE.state
+
+    if 0:
+        session = MYBASE.create_session()
+        machine = session.machine
+
+    #manage = MYBASE.manager()
+##    for i in  vbox.system_properties:
+ ##       print i
+
+
+#    MYBASE.clone_to("Pool ", "test")
+
+#J print vm.system_properties
+
+#    vb = virtualbox.Manager()
+#    vb.manager(None, "list vms") 
+
+#    mpool =  virtualbox.pool.MachinePool('tetsing')
+#    a = virtualbox.library.IMachine.clone(mpool)
+#    sessions = []
+#    for i in range(3):
+#       sessions.append(mpool.acquire("", ""))
+
+##    for session in sessions:
+##       with session.guest.create_session("choman", "abcd1234") as gs:
+##           _, out, _ = gs.execute("ipconfig")
+
+##
+ ##   # You now have three running machines.
+  ##  for session in sessions:
+   ##     with session.guest.create_session("Mick", "password") as gs:
+    ##        _, out, _ = gs.execute("ipconfig")
+     ##       print(out)
+##
+ ##   for session in sessions:
+ ##       pool.release(session)
+##
+
+    while True:
+        mylist = []
+        inuse  = []
+
+##        for vm in vbox.machines:
+##            print virtualbox.library.MachineState(vm.name)
+
+        [mylist.append(vm) for vm in vbox.machines if PREFIX.search(vm.name)]
+        [inuse.append(vm) for vm in vbox.machines if pool.search(vm.name)]
+
+        cursize = len(mylist)
+
+        if cursize < initsize:
+            state   = virtualbox.library.CloneMode(1)
+            options = virtualbox.library.CloneOptions(1)
+
+            if 0:
+                print "Cloning"
+                MYBASE.clone_to("bob", state, options)
+
+            else:
+                a = virtualbox.library.IMachine.clone(MYBASE, mode=state)
+                a.virtualbox.library.IVRDEServer.set_vrde_property(port, 4444)
+
+                if 0:
+                    a.take_snapshot("initial", "testing", True)
+                    m = virtualbox.library.IMachine.take_snapshot(a, "bob", "alsbndl", False)
+                    aclone = vbox.find_machine(a.name)
+                    session = virtualbox.Session()
+                    aclone.lock_machine(session, virtualbox.library.LockType(2))
+
+#                console = session.console
+                    aclone.take_snapshot("initialised", "base image", False)
+                
+
+##                b =virtualbox.library.IMachine.take_snapshot(a, "", "", False)
+ ##               print "%s: %s" % (a.name, a.state)
+  ##              a.take_snapshot("test", "test", False)
+            
+                
+            #a.snapshot("", "", True)
+            #a = virtualbox.library.clone(BASE, mode="machine", options=[], name=None, uuid=None, groups=[], basefolder='', register=True)
+
+        #are machines in use
+        
+        if cursize > maxcount:
+            # need more machine
+        
+            pass
+
+        
+#        vms = manage.manager("list", "vms")
+        #vm = vbox.find_machine('testing002')
+
+mygo()
+    
+        
+         
