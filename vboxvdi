@@ -6,7 +6,8 @@ import subprocess
 import shlex
 import time
 import virtualbox
-import virtualbox.library as Library
+from virtualbox.library import LockType
+import virtualbox.library
 import virtualbox.library_ext
 import virtualbox.pool
 import re
@@ -49,11 +50,15 @@ def mygo():
     mgr  = virtualbox.Manager()
 
 
-    SHARED_LOCK = virtualbox.library.LockType(1)
-    WRITE_LOCK = virtualbox.library.LockType.write
+    SHARED_LOCK = LockType(1)
+    WRITE_LOCK  = LockType(2)
+
+    SHARED_LOCK = LockType.shared
+    WRITE_LOCK  = LockType.write
+
     VM_LOCK = virtualbox.library.LockType(3)
 
-    MYLOCK = WRITE_LOCK
+    MYLOCK = SHARED_LOCK
 
     # Does defined BASE vm exist?
     [mylist.append(vm.name) for vm in vbox.machines]
@@ -62,56 +67,58 @@ def mygo():
         sys.exit()
 
     MYBASE = vbox.find_machine(BASE)
-    print vbox.version
-    print vbox.version_normalized
-    print "(%s)" % MYBASE.name
-    print "(%s)" % MYBASE.state
-    print "(%s)" % MYBASE.vrde_server
-    print "cpu_count: (%s)" % MYBASE.cpu_count
-    print "current_state_modified: (%s)" % MYBASE.current_state_modified
-#    MYBASE.take_snapshot("test", "boo", False)
+ 
 
+    print
+    print "VirtualBox Info:"
+    print "  - version: %s" % vbox.version
+    print "  - version: %s" % vbox.version_normalized
+
+    
+
+    print
+    print "Base Image Info:"
+    print "  - (%s)" % MYBASE.name
+    print "  - (%s)" % MYBASE.state
+    print "  - (%s)" % MYBASE.vrde_server
+    print "  - cpu_count: (%s)" % MYBASE.cpu_count
+    print "  - current_state_modified: (%s)" % MYBASE.current_state_modified
+
+    print 
+    print "Begin cloning:"
     state   = virtualbox.library.CloneMode(1)
     options = virtualbox.library.CloneOptions(1)
 
     a = virtualbox.library.IMachine.clone(MYBASE, mode=state)
 
-    session = mgr.get_session()
+    vbox1 = virtualbox.VirtualBox()
+    a = vbox1.find_machine(a.name)
 
-    if 0:
-       if 1:
-          session = virtualbox.Session()
-          a.create_session(lock_type=MYLOCK, session=session)
-       else:
-          session = virtualbox.Session()
-          a.launch_vm_process(session, type_p="headless")
+    session = mgr.get_session()
 
     print session.state
     
-#    session.console.power_down()
     a.lock_machine(session, MYLOCK)
 
-    time.sleep (10)
+    time.sleep (5)
 
     
     print "Taking snapshot: ", session.machine.current_snapshot
-    x, p = session.machine.take_snapshot("test1", "test2", True)
+
+    if 1:
+        x, p = session.machine.take_snapshot("test1", "test2", True)
+    else:
+        x, p = session.console.take_snapshot("test1", "test2", True)
 
     print "waiting"
 
-    if 0:
-        while not p.completed:
-            time.sleep(1)
+    try:
+        p.wait_for_completion(10)
+    except:
+        pass
 
-    else:
-        try:
-            p.wait_for_completion(10)
-        except:
-            pass
-
- 
-    a.state = 1
     print x
+ 
 #    session.unlock_machine()
 
 
@@ -184,7 +191,7 @@ def mygo():
                     m = virtualbox.library.IMachine.take_snapshot(a, "bob", "alsbndl", False)
                     aclone = vbox.find_machine(a.name)
                     session = virtualbox.Session()
-                    aclone.lock_machine(session, virtualbox.library.LockType(2))
+                    aclone.lock_machine(session, LockType(2))
 
 #                console = session.console
                     aclone.take_snapshot("initialised", "base image", False)
