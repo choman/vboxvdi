@@ -103,7 +103,8 @@ class vboxvdi:
         self.options = virtualbox.library.CloneOptions(1)
 
         self.clone = virtualbox.library.IMachine.clone(self.BASE, mode=self.state,
-                                          basefolder=self.data_dir) #, groups=["/New group/pool"])
+                                          groups=["/pool"],
+                                          basefolder=self.data_dir)
 
     def get_session(self):
         self.session = self.mgr.get_session()
