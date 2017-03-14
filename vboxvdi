@@ -4,8 +4,9 @@ import os
 import sys
 import subprocess
 import shlex
+import time
 import virtualbox
-import virtualbox.library
+import virtualbox.library as Library
 import virtualbox.library_ext
 import virtualbox.pool
 import re
@@ -13,8 +14,8 @@ import re
 
 pool = re.compile(r'\d+$')
 BASE   = "testing"
-BASE   = "tetsing"
 BASE   = "testclone"
+BASE   = "tetsing"
 PREFIX = re.compile(r"^%s Clone" % BASE)
 
 
@@ -45,6 +46,14 @@ def mygo():
     mylist = []
 
     vbox = virtualbox.VirtualBox()
+    mgr  = virtualbox.Manager()
+
+
+    SHARED_LOCK = virtualbox.library.LockType(1)
+    WRITE_LOCK = virtualbox.library.LockType.write
+    VM_LOCK = virtualbox.library.LockType(3)
+
+    MYLOCK = WRITE_LOCK
 
     # Does defined BASE vm exist?
     [mylist.append(vm.name) for vm in vbox.machines]
@@ -57,6 +66,60 @@ def mygo():
     print vbox.version_normalized
     print "(%s)" % MYBASE.name
     print "(%s)" % MYBASE.state
+    print "(%s)" % MYBASE.vrde_server
+    print "cpu_count: (%s)" % MYBASE.cpu_count
+    print "current_state_modified: (%s)" % MYBASE.current_state_modified
+#    MYBASE.take_snapshot("test", "boo", False)
+
+    state   = virtualbox.library.CloneMode(1)
+    options = virtualbox.library.CloneOptions(1)
+
+    a = virtualbox.library.IMachine.clone(MYBASE, mode=state)
+
+    session = mgr.get_session()
+
+    if 0:
+       if 1:
+          session = virtualbox.Session()
+          a.create_session(lock_type=MYLOCK, session=session)
+       else:
+          session = virtualbox.Session()
+          a.launch_vm_process(session, type_p="headless")
+
+    print session.state
+    
+#    session.console.power_down()
+    a.lock_machine(session, MYLOCK)
+
+    time.sleep (10)
+
+    
+    print "Taking snapshot: ", session.machine.current_snapshot
+    x, p = session.machine.take_snapshot("test1", "test2", True)
+
+    print "waiting"
+
+    if 0:
+        while not p.completed:
+            time.sleep(1)
+
+    else:
+        try:
+            p.wait_for_completion(10)
+        except:
+            pass
+
+ 
+    a.state = 1
+    print x
+#    session.unlock_machine()
+
+
+    print "Configuring machine"
+    a.virtualbox.library.IVRDEServer.set_vrde_property(port, 4444)
+
+    sys.exit()
+
 
     if 0:
         session = MYBASE.create_session()
@@ -98,9 +161,6 @@ def mygo():
     while True:
         mylist = []
         inuse  = []
-
-##        for vm in vbox.machines:
-##            print virtualbox.library.MachineState(vm.name)
 
         [mylist.append(vm) for vm in vbox.machines if PREFIX.search(vm.name)]
         [inuse.append(vm) for vm in vbox.machines if pool.search(vm.name)]
