@@ -4,8 +4,10 @@ Todo
     - add line to port
     - rm line to port
 - setup as service
-- clone vms to pool (group)
+- clone vms to pool (group) - in GUI, already separated on disk
 - restore snapshot after 1m (logged off or powered down)
--  
+- support config file
+
+
 
 
