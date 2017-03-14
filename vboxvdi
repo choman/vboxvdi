@@ -14,15 +14,11 @@ import virtualbox.pool
 import re
 
 
-
-
-
 pool = re.compile(r'\d+$')
 BASE   = "testing"
-BASE   = "testclone"
 BASE   = "tetsing"
+BASE   = "testclone"
 PREFIX = re.compile(r"^%s Clone" % BASE)
-
 
 VBOXMANAGE = "/usr/bin/vboxmanage"
 
@@ -34,7 +30,7 @@ class vboxvdi:
         self.mylist = []
         self.cpu_count   = 2
         self.memory_size = 2048
-        self.data_dir = "/VDI"
+        self.data_dir = "/vdi"
         self.beginning_port = 5000
         self.current_port   = self.beginning_port
 
@@ -42,13 +38,24 @@ class vboxvdi:
         self.mgr  = virtualbox.Manager()
 
         self.print_vbox_info()
-
         self.__define_lock_types()
-        self.get_base_image()
-        self.clone_base_image()
-        self.get_session()
-        self.set_clone_settings()
-        self.take_snapshot()
+
+        while True:
+            mylist = []
+            inuse  = []
+
+            [mylist.append(vm) for vm in self.vbox.machines if PREFIX.search(vm.name)]
+##            [inuse.append(vm) for vm in self.vbox.machines if pool.search(vm.name)]
+
+            cursize = len(mylist)
+
+            if cursize < self.initsize:
+
+                self.get_base_image()
+                self.clone_base_image()
+                self.get_session()
+                self.set_clone_settings()
+                self.take_snapshot()
 
     def __define_lock_types(self):
         SHARED_LOCK = LockType(1)
