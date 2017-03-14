@@ -96,9 +96,27 @@ def mygo():
 
     session = mgr.get_session()
 
-    print session.state
-    
+    #lock machine (writing) 
     a.lock_machine(session, MYLOCK)
+    console = session.console
+
+    print session.state
+
+    
+    #
+    # Make system changes
+    vrde    = a.vrde_server
+    print vrde.vrde_properties
+
+    ports = vrde.get_vrde_property("TCP/Ports")
+    print ports
+
+    session.machine.save_settings()
+    vrde.set_vrde_property("TCP/Ports", "5555")
+
+    ports = vrde.get_vrde_property("TCP/Ports")
+    print ports
+
 
     time.sleep (5)
 
@@ -116,6 +134,8 @@ def mygo():
         p.wait_for_completion(10)
     except:
         pass
+
+    print "session.name = ", session.name
 
     print x
  
