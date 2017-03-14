@@ -24,6 +24,9 @@ VBOXMANAGE = "/usr/bin/vboxmanage"
 
 class vboxvdi:
     def __init__(self):
+        mylist = []
+        inuse  = []
+
         self.initsize = 5
         self.freesize = 2
         self.maxcount = 10
@@ -40,10 +43,12 @@ class vboxvdi:
         self.print_vbox_info()
         self.__define_lock_types()
 
-        while True:
-            mylist = []
-            inuse  = []
 
+        while True:
+
+            self.get_base_image()
+
+            del mylist[:]
             [mylist.append(vm) for vm in self.vbox.machines if PREFIX.search(vm.name)]
 ##            [inuse.append(vm) for vm in self.vbox.machines if pool.search(vm.name)]
 
@@ -51,7 +56,6 @@ class vboxvdi:
 
             if cursize < self.initsize:
 
-                self.get_base_image()
                 self.clone_base_image()
                 self.get_session()
                 self.set_clone_settings()
@@ -69,15 +73,13 @@ class vboxvdi:
 
     # Does defined BASE vm exist?
     def get_base_image(self):
-        
-        [self.mylist.append(vm.name) for vm in self.vbox.machines]
 
-        if BASE not in self.mylist:
+        try:
+            self.BASE = self.vbox.find_machine(BASE)
+        except:
             print ("ERROR: base machine missing: %s" % BASE)
             sys.exit()
-
-        self.BASE = self.vbox.find_machine(BASE)
-
+        
         self.print_base_image_info()
 
     def print_vbox_info(self):
@@ -88,11 +90,11 @@ class vboxvdi:
     def print_base_image_info(self):
         print ("")
         print ("Base Image Info:")
-        print ("  - (%s)" % self.BASE.name)
-        print ("  - (%s)" % self.BASE.state)
+        print ("  - Name:  %s" % self.BASE.name)
+        print ("  - State: %s" % self.BASE.state)
         print ("  - (%s)" % self.BASE.vrde_server)
-        print ("  - cpu_count: (%s)" % self.BASE.cpu_count)
-        print ("  - current_state_modified: (%s)" % self.BASE.current_state_modified)
+        print ("  - cpu_count: %s" % self.BASE.cpu_count)
+        print ("  - current_state_modified: %s" % self.BASE.current_state_modified)
 
     def print_clone_info(self):
         print ("")
@@ -160,218 +162,6 @@ class vboxvdi:
         cmd = shlex.split(cmd)
 ##        while subprocess.Popen(cmd, stdout=subprocess.PIPE) as proc:
 ##            print proc.stdout.read()
-
-
-def clonevm():
-    print ("cloning machine")
-     
-
-def mygo():
-    initsize = 5
-    freesize = 2
-    maxcount = 10
-    mylist = []
-    cpu_count   = 2
-    memory_size = 2048
-
-
-    vbox = virtualbox.VirtualBox()
-    mgr  = virtualbox.Manager()
-
-    SHARED_LOCK = LockType(1)
-    WRITE_LOCK  = LockType(2)
-
-    SHARED_LOCK = LockType.shared
-    WRITE_LOCK  = LockType.write
-
-    VM_LOCK = virtualbox.library.LockType(3)
-
-    MYLOCK = SHARED_LOCK
-
-    # Does defined BASE vm exist?
-    [mylist.append(vm.name) for vm in vbox.machines]
-    if BASE not in mylist:
-        print ("ERROR: base machine missing")
-        sys.exit()
-
-    MYBASE = vbox.find_machine(BASE)
- 
-
-    print
-    print "VirtualBox Info:"
-    print "  - version: %s" % vbox.version
-    print "  - version: %s" % vbox.version_normalized
-
-
-    print
-    print "Base Image Info:"
-    print "  - (%s)" % MYBASE.name
-    print "  - (%s)" % MYBASE.state
-    print "  - (%s)" % MYBASE.vrde_server
-    print "  - cpu_count: (%s)" % MYBASE.cpu_count
-    print "  - current_state_modified: (%s)" % MYBASE.current_state_modified
-
-    print 
-    print "Begin cloning:"
-    state   = virtualbox.library.CloneMode(1)
-    options = virtualbox.library.CloneOptions(1)
-
-    a = virtualbox.library.IMachine.clone(MYBASE, mode=state,
-                                          basefolder="/VDI", groups=["/New group/pool"])
-
-
-##    vbox1 = virtualbox.VirtualBox()
-##    a = vbox1.find_machine(a.name)
-
-#    a.unregister(virtualbox.library.CleanupMode(1))
-
-    session = mgr.get_session()
-
-    #lock machine (writing) 
-    a.lock_machine(session, MYLOCK)
-    console = session.console
-
-
-    print "  - State;        %s"  % session.state
-    print "  - memory_size:  %sM" % a.memory_size
-    print "  - cpu_count:    %s"  % a.cpu_count
-    print "  - OS:           %s"  % a.os_type_id
-    print "  - Snapshots:    %s"  % a.snapshot_count
-    
-    print 
-    print "Configuring machine"
-    #
-    # Make system changes
-    vrde    = session.machine.vrde_server
-
-    vrde.set_vrde_property("TCP/Ports", "%s" % 5567)
-
-#    session.machine.groups = "/pool"
-    session.machine.memory_size = memory_size
-    session.machine.cpu_count = cpu_count
-
-    session.machine.save_settings()
-
-    print "  - State;        %s"  % session.state
-    print "  - memory_size:  %sM" % a.memory_size
-    print "  - cpu_count:    %s"  % a.cpu_count
-    print "  - OS:           %s"  % a.os_type_id
-    print "  - Snapshots:    %s" % a.snapshot_count
-    time.sleep (5)
-
-    
-    print "Taking snapshot: ", session.machine.current_snapshot
-
-    if 1:
-        x, p = session.machine.take_snapshot("test1", "test2", True)
-    else:
-        x, p = session.console.take_snapshot("test1", "test2", True)
-
-    print "waiting"
-
-    try:
-        p.wait_for_completion(10)
-    except:
-        pass
-
-
-    session.unlock_machine()
-
-    a.launch_vm_process(type_p="headless")
-
-
-    sys.exit()
-
-
-    if 0:
-        session = MYBASE.create_session()
-        machine = session.machine
-
-    #manage = MYBASE.manager()
-##    for i in  vbox.system_properties:
- ##       print i
-
-
-#    MYBASE.clone_to("Pool ", "test")
-
-#J print vm.system_properties
-
-#    vb = virtualbox.Manager()
-#    vb.manager(None, "list vms") 
-
-#    mpool =  virtualbox.pool.MachinePool('tetsing')
-#    a = virtualbox.library.IMachine.clone(mpool)
-#    sessions = []
-#    for i in range(3):
-#       sessions.append(mpool.acquire("", ""))
-
-##    for session in sessions:
-##       with session.guest.create_session("choman", "abcd1234") as gs:
-##           _, out, _ = gs.execute("ipconfig")
-
-##
- ##   # You now have three running machines.
-  ##  for session in sessions:
-   ##     with session.guest.create_session("Mick", "password") as gs:
-    ##        _, out, _ = gs.execute("ipconfig")
-     ##       print(out)
-##
- ##   for session in sessions:
- ##       pool.release(session)
-##
-
-    while True:
-        mylist = []
-        inuse  = []
-
-        [mylist.append(vm) for vm in vbox.machines if PREFIX.search(vm.name)]
-        [inuse.append(vm) for vm in vbox.machines if pool.search(vm.name)]
-
-        cursize = len(mylist)
-
-        if cursize < initsize:
-            state   = virtualbox.library.CloneMode(1)
-            options = virtualbox.library.CloneOptions(1)
-
-            if 0:
-                print "Cloning"
-                MYBASE.clone_to("bob", state, options)
-
-            else:
-                a = virtualbox.library.IMachine.clone(MYBASE, mode=state)
-                a.virtualbox.library.IVRDEServer.set_vrde_property(port, 4444)
-
-                if 0:
-                    a.take_snapshot("initial", "testing", True)
-                    m = virtualbox.library.IMachine.take_snapshot(a, "bob", "alsbndl", False)
-                    aclone = vbox.find_machine(a.name)
-                    session = virtualbox.Session()
-                    aclone.lock_machine(session, LockType(2))
-
-#                console = session.console
-                    aclone.take_snapshot("initialised", "base image", False)
-                
-
-##                b =virtualbox.library.IMachine.take_snapshot(a, "", "", False)
- ##               print "%s: %s" % (a.name, a.state)
-  ##              a.take_snapshot("test", "test", False)
-            
-                
-            #a.snapshot("", "", True)
-            #a = virtualbox.library.clone(BASE, mode="machine", options=[], name=None, uuid=None, groups=[], basefolder='', register=True)
-
-        #are machines in use
-        
-        if cursize > maxcount:
-            # need more machine
-        
-            pass
-
-        
-#        vms = manage.manager("list", "vms")
-        #vm = vbox.find_machine('testing002')
-
-#mygo()
 
 if __name__ == "__main__":
     a = vboxvdi()
