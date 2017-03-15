@@ -38,7 +38,7 @@ class vboxvdi:
         self.memory_size = 2048
         self.data_dir = "/vdi"
         self.beginning_port = 5000
-        self.current_port   = self.beginning_port
+        self.vm_port        = self.beginning_port
 
         self.vbox = virtualbox.VirtualBox()
         self.mgr  = virtualbox.Manager()
@@ -59,6 +59,8 @@ class vboxvdi:
 ##            [inuse.append(vm) for vm in self.vbox.machines if pool.search(vm.name)]
 
             cursize = len(mylist)
+
+            if cursize >= self.maxcount: continue
 
             if cursize < self.initsize:
 
@@ -116,13 +118,13 @@ class vboxvdi:
         print ("  - current_state_modified: %s" % self.BASE.current_state_modified)
 
     def get_vrde_port(self):
-        self.port = self.beginning_port
+        self.vm_port = self.beginning_port
 
         if PREFIX.search(self.clone.name):
             start = self.clone.name.find('(') + 1
             end   = self.clone.name.find(')')
             output = self.clone.name[start:end]
-            self.port += int(output)
+            self.vm_port += int(output)
              
     def print_clone_info(self):
         print ("")
@@ -161,12 +163,15 @@ class vboxvdi:
 
         vrde    = self.session.machine.vrde_server
 
-        vrde.set_vrde_property("TCP/Ports", "%s" % self.port)
-        self.current_port += 1
+        vrde.set_vrde_property("TCP/Ports", "%s" % self.vm_port)
 
         #    session.machine.groups = "/pool"
         self.session.machine.memory_size = self.memory_size
         self.session.machine.cpu_count   = self.cpu_count
+        print "groups: ", type(self.session.machine.groups)
+        del self.session.machine.groups[:]
+        self.session.machine.groups.append("/pool")
+        print "Groups: ", self.session.machine.groups
 
         self.session.machine.save_settings()
         self.print_clone_info()
