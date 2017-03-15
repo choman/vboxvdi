@@ -107,7 +107,7 @@ class vboxvdi:
 
             self.free_count = self.cursize = len(self.vmlist)
 
-            self.check_vrde()
+            self.check_pool()
 
             if self.cursize >= self.maxcount: continue
 
@@ -121,12 +121,15 @@ class vboxvdi:
 
             count += 1
 
-    def check_vrde(self):
+    def check_pool(self):
         for vm in self.vmlist:
-            print ("  - Name:  %s" % vm.name)
-            print ("  - State: %s" % vm.state)
             self.runstuff(vm.name)
-            print self.active_sessions 
+
+            print ("")
+            print ("  - Name:   %s" % vm.name)
+            print ("  - State:  %s" % vm.state)
+            print ("  - Port:   %s" % vm.vrde_server.get_vrde_property("TCP/Ports"))
+            print ("  - Active: %s" % self.active_sessions[vm.name])
             session = self.mgr.get_session()
     
 
@@ -186,6 +189,8 @@ class vboxvdi:
         print ("  - current_state_modified: %s" % self.BASE.current_state_modified)
 
     def runstuff(self, name):
+        self.active_sessions[name] = False
+
         cmd = "%s guestcontrol '%s' --username %s --password %s run --exe /bin/ps" % (VBOXMANAGE, name, self.vdiadmin, self.vdipasswd)
         fcmd = shlex.split(cmd.replace(self.vdipasswd, "******"))
         cmd = shlex.split(cmd)
