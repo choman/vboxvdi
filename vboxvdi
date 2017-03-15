@@ -85,7 +85,7 @@ class vboxvdi:
         self.timer = {}
 
         self.PREFIX          = re.compile(r"^%s Clone" % self.BASE)
-        ##self.clone_num       = re.compile(r"^%s Clone (\d+)" % self.BASE)
+        self.clone_num       = re.compile(r"^%s Clone (\d+)" % self.BASE)
 
         self.vbox = virtualbox.VirtualBox()
         self.mgr  = virtualbox.Manager()
@@ -228,7 +228,7 @@ class vboxvdi:
     def get_vrde_port(self):
         self.vm_port = self.beginning_port
 
-        if self.PREFIX.search(self.clone.name):
+        if self.clone_num.search(self.clone.name):
             start = self.clone.name.find('(') + 1
             end   = self.clone.name.find(')')
             output = self.clone.name[start:end]
