@@ -20,25 +20,34 @@ BASE      = "testclone"
 BASE      = "tetsing"
 PREFIX    = re.compile(r"^%s Clone" % BASE)
 clone_num = re.compile(r"^%s Clone (\d+)" % BASE)
+mate      = re.compile(r"mate-session")
 
 VBOXMANAGE = "/usr/bin/vboxmanage"
 
+
+VDIADMIN  = "choman"
+VDIPASSWD = "abcd1234"
+
 class vboxvdi:
     def __init__(self):
-        mylist = []
         inuse  = []
         count  = 0
 
-        self.BASE     = ""
-        self.initsize = 5
-        self.freesize = 2
-        self.maxcount = 10
-        self.mylist = []
-        self.cpu_count   = 2
-        self.memory_size = 2048
-        self.data_dir = "/vdi"
-        self.beginning_port = 5000
-        self.vm_port        = self.beginning_port
+        self.BASE            = ""
+        self.initsize        = 5
+        self.freesize        = 2
+        self.free_count      = 0
+        self.maxcount        = 10
+        self.vmlist          = []
+        self.cpu_count       = 2
+        self.memory_size     = 2048
+        self.data_dir        = "/vdi"
+        self.beginning_port  = 5000
+        self.vm_port         = self.beginning_port
+        self.state           = virtualbox.library.CloneMode(1)
+        self.options         = virtualbox.library.CloneOptions(1)
+        self.active_sessions = {}
+        self.timer = {}
 
         self.vbox = virtualbox.VirtualBox()
         self.mgr  = virtualbox.Manager()
@@ -52,31 +61,46 @@ class vboxvdi:
 
         while True:
 
-            print count
             time.sleep(1)
 
-            del mylist[:]
-            [mylist.append(vm) for vm in self.vbox.machines if PREFIX.search(vm.name)]
+            del self.vmlist[:]
+            [self.vmlist.append(vm) for vm in self.vbox.machines if PREFIX.search(vm.name)]
 ##            [inuse.append(vm) for vm in self.vbox.machines if pool.search(vm.name)]
 
-            cursize = len(mylist)
+            self.free_count = self.cursize = len(self.vmlist)
 
-            if cursize >= self.maxcount: continue
+            self.check_vrde()
 
-            if cursize < self.initsize:
+            if self.cursize >= self.maxcount: continue
 
-                self.clone_base_image()
-                self.get_session()
-                self.set_clone_settings()
-                self.take_snapshot()
-                self.launch_vm()
+            self.clone_vm()
 
             if 0:
                 # simulate removing vm
+                print count
                 if count == 15:
                     self.remove_vm("tetsing Clone (3)")
 
             count += 1
+
+    def check_vrde(self):
+        for vm in self.vmlist:
+            print ("  - Name:  %s" % vm.name)
+            print ("  - State: %s" % vm.state)
+            self.runstuff(vm.name)
+            print self.active_sessions 
+            session = self.mgr.get_session()
+    
+
+    def clone_vm(self):
+        if self.cursize < self.initsize or self.free_count < self.freesize:
+            self.clone_base_image()
+            self.get_session()
+            self.set_clone_settings()
+            self.take_snapshot()
+            self.launch_vm()
+
+            self.free_count += 1
 
     def __define_lock_types(self):
         SHARED_LOCK = LockType(1)
@@ -123,6 +147,34 @@ class vboxvdi:
         print ("  - cpu_count: %s" % self.BASE.cpu_count)
         print ("  - current_state_modified: %s" % self.BASE.current_state_modified)
 
+    def runstuff(self, name):
+        cmd = "vboxmanage guestcontrol '%s' --username %s --password %s run --exe /bin/ps" % (name, VDIADMIN, VDIPASSWD)
+        cmd = shlex.split(cmd)
+#        print cmd
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+        stdout, stderr = p.communicate()
+        #print "(%s)" % stdout
+
+        if mate.search(stdout):
+            #we have a session
+            #print "active session, "   #, stdout
+            self.active_sessions[name] = True
+
+        else:
+            if name in self.active_sessions:
+                 print "inactive session"
+                 # start idle timer
+                 # stop idle timer
+                 self.active_sessions[name] = False
+
+                 if not name in self.timer:
+                     self.timer[name] = time.time()
+                 
+                 x = time.time() -  self.timer[name]
+
+                 if x >= 60:
+                     self.remove_vm(name)
+
     def get_vrde_port(self):
         self.vm_port = self.beginning_port
 
@@ -147,8 +199,6 @@ class vboxvdi:
     def clone_base_image(self):
         print ("") 
         print ("Begin cloning:")
-        self.state   = virtualbox.library.CloneMode(1)
-        self.options = virtualbox.library.CloneOptions(1)
 
         self.clone = virtualbox.library.IMachine.clone(self.BASE, mode=self.state,
                                           groups=["/pool"],
@@ -181,6 +231,8 @@ class vboxvdi:
         print "Groups: ", self.session.machine.groups
         self.session.machine.groups.append("/pool")
         print "Groups: ", self.session.machine.groups
+
+#        print "vrde: ", self.session.vrde_server_info
 
         self.session.machine.save_settings()
         self.print_clone_info()
