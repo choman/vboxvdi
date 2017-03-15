@@ -34,12 +34,31 @@ class Config:
             print(self.config['pool'])
             print(self.config['pool']['data_dir'])
 
+class IPVS:
+    def __init__(self, port=None):
+        self.port = 0
+        self.ipvs = "/home/choman/vboxvdi/ipvsadd.sh"
+
+    def add(self, port):
+        self.cmd = "sudo %s -a %s" % (self.ipvs, port)
+        self.run()
+
+    def delete(self, port):
+        self.cmd = "sudo %s -d %s" % (self.ipvs, port)
+        self.run()
+
+    def run(self):
+        cmd = shlex.split(self.cmd)
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+        p.communicate()
+
 class vboxvdi:
     def __init__(self):
         inuse  = []
         count  = 0
 
         self.vdi = Config()
+        self.xray = IPVS()
 
 #        print self.vdi.config["pool"]
 
@@ -243,6 +262,8 @@ class vboxvdi:
         vrde    = self.session.machine.vrde_server
 
         vrde.set_vrde_property("TCP/Ports", "%s" % self.vm_port)
+        self.xray.add(self.vm_port)
+        
 
         #    session.machine.groups = "/pool"
         self.session.machine.memory_size = self.memory_size
@@ -276,6 +297,9 @@ class vboxvdi:
 
     def remove_vm(self, name):
         a = self.vbox.find_machine(name)
+
+        self.xray.delete(a.vrde_server.get_vrde_property("TCP/Ports"))
+
         a.remove()
          
     def launch_vm(self):
