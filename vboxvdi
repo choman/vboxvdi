@@ -52,6 +52,7 @@ class vboxvdi:
 
         while True:
 
+            print count
             time.sleep(1)
 
             del mylist[:]
@@ -69,6 +70,11 @@ class vboxvdi:
                 self.set_clone_settings()
                 self.take_snapshot()
                 self.launch_vm()
+
+            if 0:
+                # simulate removing vm
+                if count == 15:
+                    self.remove_vm("tetsing Clone (3)")
 
             count += 1
 
@@ -168,8 +174,11 @@ class vboxvdi:
         #    session.machine.groups = "/pool"
         self.session.machine.memory_size = self.memory_size
         self.session.machine.cpu_count   = self.cpu_count
+        print ""
+        print "Groups: ", self.session.machine.groups
         print "groups: ", type(self.session.machine.groups)
         del self.session.machine.groups[:]
+        print "Groups: ", self.session.machine.groups
         self.session.machine.groups.append("/pool")
         print "Groups: ", self.session.machine.groups
 
@@ -189,7 +198,11 @@ class vboxvdi:
             pass
 
         self.session.unlock_machine()
-    
+
+    def remove_vm(self, name):
+        a = self.vbox.find_machine(name)
+        a.remove()
+         
     def launch_vm(self):
 
         #refresh session
