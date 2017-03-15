@@ -14,11 +14,12 @@ import virtualbox.pool
 import re
 
 
-pool = re.compile(r'\d+$')
-BASE   = "testing"
-BASE   = "testclone"
-BASE   = "tetsing"
-PREFIX = re.compile(r"^%s Clone" % BASE)
+pool      = re.compile(r'\d+$')
+BASE      = "testing"
+BASE      = "testclone"
+BASE      = "tetsing"
+PREFIX    = re.compile(r"^%s Clone" % BASE)
+clone_num = re.compile(r"^%s Clone (\d+)" % BASE)
 
 VBOXMANAGE = "/usr/bin/vboxmanage"
 
@@ -114,6 +115,15 @@ class vboxvdi:
         print ("  - cpu_count: %s" % self.BASE.cpu_count)
         print ("  - current_state_modified: %s" % self.BASE.current_state_modified)
 
+    def get_vrde_port(self):
+        self.port = self.beginning_port
+
+        if PREFIX.search(self.clone.name):
+            start = self.clone.name.find('(') + 1
+            end   = self.clone.name.find(')')
+            output = self.clone.name[start:end]
+            self.port += int(output)
+             
     def print_clone_info(self):
         print ("")
         print ("  - Name:         %s"  % self.clone.name)
@@ -143,13 +153,15 @@ class vboxvdi:
 
         self.clone.lock_machine(self.session, self.LOCKTYPE)
         self.console = self.session.console
-        self.console.register_on_vrde_server_changed(self.testing)
+#        self.console.register_on_vrde_server_changed(self.testing)
 
     def set_clone_settings(self):
         self.print_clone_info()
+        self.get_vrde_port()
+
         vrde    = self.session.machine.vrde_server
 
-        vrde.set_vrde_property("TCP/Ports", "%s" % self.current_port)
+        vrde.set_vrde_property("TCP/Ports", "%s" % self.port)
         self.current_port += 1
 
         #    session.machine.groups = "/pool"
@@ -175,10 +187,15 @@ class vboxvdi:
     
     def launch_vm(self):
 
+        #refresh session
+        self.session = virtualbox.Session()
+
         if 0:
             self.clone.launch_vm_process(session=self.session, type_p="headless")
         else:
-            self.clone.launch_vm_process(type_p="headless")
+            self.clone.launch_vm_process(session=self.session, type_p="headless")
+
+#        self.session.console.register_on_vrde_server_changed(self.testing)
 
     def runme(self):
         pass
