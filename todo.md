@@ -3,12 +3,14 @@ Todo
 General:
 - ~~launch clones after snapshot~~
 - setup as service
-- restore snapshot after 1m (logged off or powered down)
 - ~~support config file~~
 - support program logging
-- need speedier snapshot - issues in pyvbox?
 - clone hdd not in pool
-- remove idle machine if count is > freesize
+- remove idle machine if total count is > freesize
+
+Snapshots:
+- Currently deleting clone, reset snapshot after 1m (logged off or powered down)
+- need speedier snapshot - issues in pyvbox?
 
 VRDE
 - track sessions of clones
