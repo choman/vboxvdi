@@ -85,7 +85,7 @@ class vboxvdi:
         self.timer = {}
 
         self.PREFIX          = re.compile(r"^%s Clone" % self.BASE)
-        self.clone_num       = re.compile(r"^%s Clone (\d+)" % self.BASE)
+        self.clone_num       = re.compile(r"^%s Clone \(\d+\)" % self.BASE)
 
         self.vbox = virtualbox.VirtualBox()
         self.mgr  = virtualbox.Manager()
@@ -129,7 +129,12 @@ class vboxvdi:
             print ("  - Name:   %s" % vm.name)
             print ("  - State:  %s" % vm.state)
             print ("  - Port:   %s" % vm.vrde_server.get_vrde_property("TCP/Ports"))
-            print ("  - Active: %s" % self.active_sessions[vm.name])
+
+            if vm.name in self.active_sessions:
+                print ("  - Active: %s" % self.active_sessions[vm.name])
+            else:
+                print ("  - Active: Unknown")
+
             session = self.mgr.get_session()
     
 
@@ -207,8 +212,11 @@ class vboxvdi:
             self.active_sessions[name] = True
             self.free_count -= 1
 
+            if name in self.timer:
+                self.timer.pop(name)
+
         else:
-            if name in self.active_sessions:
+            if self.active_sessions[name]:
                  print "inactive session"
                  # start idle timer
                  # stop idle timer
@@ -221,9 +229,7 @@ class vboxvdi:
 
                  if x >= 60:
                      self.remove_vm(name)
-                     self.active_sessions.pop(name)
                      self.timer.pop(name)
-                     
 
     def get_vrde_port(self):
         self.vm_port = self.beginning_port
