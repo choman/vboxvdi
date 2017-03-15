@@ -1,6 +1,16 @@
-init = 5
-free = 2
-max  = 20
+general:
+   vdiadmin:  
+   vdipasswd:
+   pool:   
+      - pool
 
-#
-other = 0
+pool:
+   base_image:         
+   data_dir:           /vdi
+   initial_size:       5
+   free_size:          3
+   max_size:           10
+   cpu_count:          2
+   mem_size:           2048
+   start_vrde_port:    5000
+    
