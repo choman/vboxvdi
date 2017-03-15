@@ -35,7 +35,7 @@ class vboxvdi:
 
         self.BASE            = ""
         self.initsize        = 5
-        self.freesize        = 2
+        self.freesize        = 5
         self.free_count      = 0
         self.maxcount        = 10
         self.vmlist          = []
@@ -159,6 +159,7 @@ class vboxvdi:
             #we have a session
             #print "active session, "   #, stdout
             self.active_sessions[name] = True
+            self.free_count -= 1
 
         else:
             if name in self.active_sessions:
@@ -174,6 +175,9 @@ class vboxvdi:
 
                  if x >= 60:
                      self.remove_vm(name)
+                     self.active_sessions.pop(name)
+                     self.timer.pop(name)
+                     
 
     def get_vrde_port(self):
         self.vm_port = self.beginning_port
