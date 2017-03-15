@@ -16,8 +16,8 @@ import re
 
 pool = re.compile(r'\d+$')
 BASE   = "testing"
-BASE   = "tetsing"
 BASE   = "testclone"
+BASE   = "tetsing"
 PREFIX = re.compile(r"^%s Clone" % BASE)
 
 VBOXMANAGE = "/usr/bin/vboxmanage"
@@ -26,6 +26,7 @@ class vboxvdi:
     def __init__(self):
         mylist = []
         inuse  = []
+        count  = 0
 
         self.BASE     = ""
         self.initsize = 5
@@ -50,6 +51,8 @@ class vboxvdi:
 
         while True:
 
+            time.sleep(1)
+
             del mylist[:]
             [mylist.append(vm) for vm in self.vbox.machines if PREFIX.search(vm.name)]
 ##            [inuse.append(vm) for vm in self.vbox.machines if pool.search(vm.name)]
@@ -62,6 +65,9 @@ class vboxvdi:
                 self.get_session()
                 self.set_clone_settings()
                 self.take_snapshot()
+                self.launch_vm()
+
+            count += 1
 
     def __define_lock_types(self):
         SHARED_LOCK = LockType(1)
@@ -76,8 +82,12 @@ class vboxvdi:
     def __machine_state(self, event):
         print "Machine %s state changed: %s" % (event.machine_id, event.state)
 
+    def __session_state(self, event):
+        print "Session %s state changed: %s" % (event.machine_id, event.state)
+
     def __callbacks(self):
         self.vbox.register_on_machine_state_changed(self.__machine_state)
+        self.vbox.register_on_session_state_changed(self.__session_state)
 
     # Does defined BASE vm exist?
     def get_base_image(self):
@@ -107,11 +117,14 @@ class vboxvdi:
     def print_clone_info(self):
         print ("")
         print ("  - Name:         %s"  % self.clone.name)
+        print ("  - ID:           %s"  % self.clone.id_p)
         print ("  - State;        %s"  % self.session.state)
         print ("  - memory_size:  %sM" % self.clone.memory_size)
         print ("  - cpu_count:    %s"  % self.clone.cpu_count)
         print ("  - OS:           %s"  % self.clone.os_type_id)
         print ("  - Snapshots:    %s"  % self.clone.snapshot_count)
+        print ("  - Groups:       %s"  % self.clone.groups)
+#        print ("  - Guest Props:  %s"  % self.clone.enumerate_guest_properties(""))
     
     def clone_base_image(self):
         print ("") 
@@ -122,12 +135,15 @@ class vboxvdi:
         self.clone = virtualbox.library.IMachine.clone(self.BASE, mode=self.state,
                                           groups=["/pool"],
                                           basefolder=self.data_dir)
+    def testing(self, event):
+        print "Machine %s vrde changed: %s" % (event.machine_id, event.state)
 
     def get_session(self):
         self.session = self.mgr.get_session()
 
         self.clone.lock_machine(self.session, self.LOCKTYPE)
         self.console = self.session.console
+        self.console.register_on_vrde_server_changed(self.testing)
 
     def set_clone_settings(self):
         self.print_clone_info()
@@ -157,6 +173,8 @@ class vboxvdi:
 
         self.session.unlock_machine()
     
+    def launch_vm(self):
+
         if 0:
             self.clone.launch_vm_process(session=self.session, type_p="headless")
         else:
