@@ -8,7 +8,7 @@ General:
 - support program logging
 - need speedier snapshot - issues in pyvbox?
 - clone hdd not in pool
-- remove idle machine if coutn is > freesize
+- remove idle machine if count is > freesize
 
 VRDE
 - track sessions of clones
