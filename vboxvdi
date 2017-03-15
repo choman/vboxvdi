@@ -24,21 +24,20 @@ mate      = re.compile(r"mate-session")
 
 VBOXMANAGE = "/usr/bin/vboxmanage"
 
-
-VDIADMIN  = "choman"
-VDIPASSWD = "abcd1234"
+DEBUG = False
 
 class Config:
     def __init__(self):
         with open("config.yml", 'r') as ymlfile:
             self.config = yaml.load(ymlfile)
 
-#        for section in self.config:
-#            print(section)
-#
-#        print(self.config['general'])
-#        print(self.config['pool'])
-#        print(self.config['pool']['data_dir'])
+        if DEBUG:
+            for section in self.config:
+                print(section)
+
+            print(self.config['general'])
+            print(self.config['pool'])
+            print(self.config['pool']['data_dir'])
 
 class vboxvdi:
     def __init__(self):
@@ -166,7 +165,7 @@ class vboxvdi:
         print ("  - current_state_modified: %s" % self.BASE.current_state_modified)
 
     def runstuff(self, name):
-        cmd = "vboxmanage guestcontrol '%s' --username %s --password %s run --exe /bin/ps" % (name, VDIADMIN, VDIPASSWD)
+        cmd = "vboxmanage guestcontrol '%s' --username %s --password %s run --exe /bin/ps" % (name, self.vdiadmin, self.vdipasswd)
         cmd = shlex.split(cmd)
 #        print cmd
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
