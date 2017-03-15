@@ -26,6 +26,9 @@ class Config:
         with open("config.yml", 'r') as ymlfile:
             self.config = yaml.load(ymlfile)
 
+        self.print_debug()
+
+    def print_debug(self):
         if DEBUG:
             for section in self.config:
                 print(section)
@@ -57,7 +60,7 @@ class vboxvdi:
         inuse  = []
         count  = 0
 
-        self.vdi = Config()
+        self.vdi  = Config()
         self.xray = IPVS()
 
 #        print self.vdi.config["pool"]
