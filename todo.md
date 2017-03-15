@@ -17,8 +17,9 @@ VRDE
 
 IPVS:
 - glue to ipvsadm as machines are created
-    - add line to port
-    - rm line to port
+    - ~~add line to port~~
+    - ~~rm line to port~~
+    - check for orphaned ipvs entries
 
 Graphical:
 - clone vms to pool (group) - in GUI, already separated on disk
