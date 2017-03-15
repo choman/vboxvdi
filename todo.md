@@ -19,7 +19,7 @@ IPVS:
 - glue to ipvsadm as machines are created
     - ~~add line to port~~
     - ~~rm line to port~~
-    - check for orphaned ipvs entries
+    - check for orphaned ipvs entries and restarts
 
 Graphical:
 - clone vms to pool (group) - in GUI, already separated on disk
