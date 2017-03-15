@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import os
-#import yaml
+import yaml
 import sys
 import subprocess
 import shlex
@@ -28,21 +28,39 @@ VBOXMANAGE = "/usr/bin/vboxmanage"
 VDIADMIN  = "choman"
 VDIPASSWD = "abcd1234"
 
+class Config:
+    def __init__(self):
+        with open("config.yml", 'r') as ymlfile:
+            self.config = yaml.load(ymlfile)
+
+#        for section in self.config:
+#            print(section)
+#
+#        print(self.config['general'])
+#        print(self.config['pool'])
+#        print(self.config['pool']['data_dir'])
+
 class vboxvdi:
     def __init__(self):
         inuse  = []
         count  = 0
 
-        self.BASE            = ""
-        self.initsize        = 5
-        self.freesize        = 5
+        self.vdi = Config()
+
+#        print self.vdi.config["pool"]
+
+        self.vdiadmin        = self.vdi.config["general"]["vdiadmin"]
+        self.vdipasswd       = self.vdi.config["general"]["vdipasswd"]
+        self.BASE            = self.vdi.config["pool"]["base_image"]
+        self.initsize        = self.vdi.config["pool"]["initial_size"]
+        self.freesize        = self.vdi.config["pool"]["free_size"]
         self.free_count      = 0
-        self.maxcount        = 10
+        self.maxcount        = self.vdi.config["pool"]["max_size"]
         self.vmlist          = []
-        self.cpu_count       = 2
-        self.memory_size     = 2048
-        self.data_dir        = "/vdi"
-        self.beginning_port  = 5000
+        self.cpu_count       = self.vdi.config["pool"]["cpu_count"]
+        self.memory_size     = self.vdi.config["pool"]["mem_size"]
+        self.data_dir        = self.vdi.config["pool"]["data_dir"]
+        self.beginning_port  = self.vdi.config["pool"]["start_vrde_port"]
         self.vm_port         = self.beginning_port
         self.state           = virtualbox.library.CloneMode(1)
         self.options         = virtualbox.library.CloneOptions(1)
@@ -126,9 +144,9 @@ class vboxvdi:
     def get_base_image(self):
 
         try:
-            self.BASE = self.vbox.find_machine(BASE)
+            self.BASE = self.vbox.find_machine(self.BASE)
         except:
-            print ("ERROR: base machine missing: %s" % BASE)
+            print ("ERROR: base machine missing: %s" % self.BASE)
             sys.exit()
         
         self.print_base_image_info()
