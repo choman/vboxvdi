@@ -42,6 +42,8 @@ class vboxvdi:
         self.mgr  = virtualbox.Manager()
 
         self.print_vbox_info()
+
+        self.__callbacks()
         self.__define_lock_types()
 
         self.get_base_image()
@@ -70,6 +72,12 @@ class vboxvdi:
         WRITE_LOCK  = LockType.write
 
         self.LOCKTYPE = SHARED_LOCK
+
+    def __machine_state(self, event):
+        print "Machine %s state changed: %s" % (event.machine_id, event.state)
+
+    def __callbacks(self):
+        self.vbox.register_on_machine_state_changed(self.__machine_state)
 
     # Does defined BASE vm exist?
     def get_base_image(self):
