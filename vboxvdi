@@ -429,34 +429,17 @@ class vboxvdi:
         self.pwait = session.console.power_down() 
         process_wait(a, 'PoweredOff')
 
-#        a.autostop_type = virtualbox.library.AutostopType(3)
         print "restore snapshot: ", a.current_snapshot.name
         a.lock_machine(session, self.LOCKTYPE)
         console = session.console
         snapshot = a.find_snapshot("test1")
         p = session.machine.restore_snapshot(snapshot)
         p.wait_for_completion(timeout=-1)
-
-        print "a.state:", a.state
-
         process_wait(a, 'PoweredOff')
 
-        if 0:
-            while True:
-                time.sleep(1)
-
-                print a.state
-                if "PoweredOff" in str(a.state):
-                    break
-
-        print "a.state:", a.state
-
         print "powering up"
-#        session = virtualbox.Session()
         session.unlock_machine()
         a.launch_vm_process(session=session, type_p="headless")
-#        a.launch_vm_process(type_p="headless")
-#        session.console.power_up()
 
     def remove_vm(self, name):
         a = self.vbox.find_machine(name)
