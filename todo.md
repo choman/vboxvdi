@@ -6,7 +6,7 @@ General:
 - ~~support config file~~
 - support program logging
 - clone hdd not in pool
-- remove idle machine if total count is > freesize
+- ~~remove idle machine if total count is > freesize~~
 
 Snapshots:
 - Currently deleting clone, reset snapshot after 1m (logged off or powered down)
