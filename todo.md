@@ -28,3 +28,8 @@ Graphical:
 BUGS:
 - occassional vboxmange bug
 - memory leak
+
+
+Future:
+- suspend vs remove
+- human readable configfile
