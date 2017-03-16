@@ -385,11 +385,14 @@ class vboxvdi:
         p = session.console.power_down() 
         p.wait_for_completion(timeout=-1)
 
-##        while True:
-##            time.sleep(1)
-##
-##            if "PoweredOff" in a.state:
-##                break
+        if 0:
+            while True:
+                time.sleep(1)
+
+                if "PoweredOff" in a.state:
+                    break
+        else:
+            time.sleep(5)
 
         print a.state
 
@@ -398,7 +401,7 @@ class vboxvdi:
 #        a.restore_snapshot()
 
         print "powering up"
-        session = virtualbox.Session()
+#        session = virtualbox.Session()
         a.launch_vm_process(session=session, type_p="headless")
 #        a.launch_vm_process(type_p="headless")
 #        session.console.power_up()
