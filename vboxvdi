@@ -10,6 +10,8 @@ import shlex
 import time
 import virtualbox
 from virtualbox.library import LockType
+from virtualbox.library import CloneMode
+from virtualbox.library import CloneOptions
 import virtualbox.library
 import virtualbox.library_ext
 import virtualbox.pool
@@ -113,6 +115,8 @@ class vboxvdi:
 
         self.__callbacks()
         self.__define_lock_types()
+        self.__define_clone_modes()
+        self.__define_clone_options()
 
         self.get_base_image()
 
@@ -218,13 +222,40 @@ class vboxvdi:
         self.active_sessions.setdefault(vmname, False)
         self.used.setdefault(vmname, False)
 
+    def __define_clone_modes(self):
+        MACHINE_STATE             = CloneMode(1)
+        MACHINE_AND_CHILD_STATES  = CloneMode(2)
+        ALL_STATES                = CloneMode(3)
+
+        MACHINE_STATE             = CloneMode.machine_state
+        MACHINE_AND_CHILD_STATES  = CloneMode.machine_and_child_states
+        ALL_STATES                = CloneMode.all_states
+
+        self.CLONE_MODE           = MACHINE_STATE
+
+    def __define_clone_options(self):
+        LINK               = CloneOptions(1)
+        KEEP_ALL_MA_CS     = CloneOptions(2)
+        KEEP_NATMA_CS      = CloneOptions(3)
+        KEEP_DISK_NAMES    = CloneOptions(3)
+
+        LINK               = CloneOptions.link
+        KEEP_ALL_MA_CS     = CloneOptions.keep_all_ma_cs
+        KEEP_NATMA_CS      = CloneOptions.keep_natma_cs
+        KEEP_DISK_NAMES    = CloneOptions.keep_disk_names
+
+        self.CLONE_OPTS    = LINK
+
     def __define_lock_types(self):
+        NULL_LOCK   = LockType(0)
         SHARED_LOCK = LockType(1)
         WRITE_LOCK  = LockType(2)
-        VM_LOCK = virtualbox.library.LockType(3)
+        VM_LOCK     = LockType(3)
 
+        NULL_LOCK   = LockType.null
         SHARED_LOCK = LockType.shared
         WRITE_LOCK  = LockType.write
+        VM_LOCK     = LockType.vm
 
         self.LOCKTYPE = SHARED_LOCK
 
@@ -350,9 +381,10 @@ class vboxvdi:
         print ("") 
         print ("Begin cloning:")
 
-        self.clone = virtualbox.library.IMachine.clone(self.BASE, mode=self.state,
-                                          groups=["/pool"],
-                                          basefolder=self.data_dir)
+        self.clone = virtualbox.library.IMachine.clone(self.BASE,
+                                        mode=self.CLONE_MODE,
+                                        groups=["/pool"],
+                                        basefolder=self.data_dir)
     def testing(self, event):
         print "Machine %s vrde changed: %s" % (event.machine_id, event.state)
 
@@ -391,20 +423,22 @@ class vboxvdi:
 
     def take_snapshot(self):
         
-##        if not self.session.machine.current_snapshot.name:
-##           print "Taking snapshot: NA"
-##        else:
-##            print "Taking snapshot: ", self.session.machine.current_snapshot.name
-
+        #x, p = self.clone.take_snapshot("test1", "test2", True)
+        self.session.unlock_machine()
+        self.clone.lock_machine(self.session, self.LOCKTYPE)
         x, p = self.session.machine.take_snapshot("test1", "test2", True)
 
-        print "waiting"
+        print "waiting, "
 
-        try:
+        if 1:
+            try:
+                p.wait_for_completion(timeout=-1)
+            except:
+                pass
+        else:
             p.wait_for_completion(timeout=-1)
-        except:
-            pass
 
+        print "snapsnot: ", x
         self.session.unlock_machine()
 
 
