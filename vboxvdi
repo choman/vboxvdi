@@ -192,7 +192,7 @@ class vboxvdi:
             #self.free_count += 1
             self.initialize_trackers(self.clone.name)
 
-    def removeTracker(self, name):
+    def removeTracker(self, vmname):
         del self.timer[vmname]
         del self.active_sessions[vmname]
         del self.used[vmname]
