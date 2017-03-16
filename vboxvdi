@@ -372,7 +372,17 @@ class vboxvdi:
 
         self.session.unlock_machine()
 
+
     def restore_snapshot(self, name):
+
+        def process_wait(item, state):
+            self.pwait.wait_for_completion(timeout=-1)
+
+            while True:
+                time.sleep(1)
+
+                if state in str(item.state):
+                    break
 
         print "HEY"
         time.sleep(2)
@@ -380,25 +390,27 @@ class vboxvdi:
         session = self.mgr.get_session()
         a.lock_machine(session, self.LOCKTYPE)
 
-
         print "powering down"
-        p = session.console.power_down() 
-        p.wait_for_completion(timeout=-1)
-
-        if 0:
-            while True:
-                time.sleep(1)
-
-                if "PoweredOff" in a.state:
-                    break
-        else:
-            time.sleep(5)
-
-        print a.state
+        self.pwait = session.console.power_down() 
+        process_wait(a, 'PoweredOff')
 
 #        a.autostop_type = virtualbox.library.AutostopType(3)
         print "restore snapshot"
-#        a.restore_snapshot()
+        a.lock_machine(session, self.LOCKTYPE)
+        console = session.console
+        snapshot = a.find_snapshot("test1")
+        p = console.restore_snapshot(snapshot)
+        p.wait_for_completion(timeout=-1)
+
+        print a.state
+        while True:
+            time.sleep(1)
+
+            print a.state
+            if "PoweredOff" in str(a.state):
+                break
+
+        print a.state
 
         print "powering up"
 #        session = virtualbox.Session()
