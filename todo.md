@@ -36,3 +36,5 @@ Future:
 - human readable configfile
 - support persistant desktops
 - assignable machines (persistance)
+- thread cloning process - others?
+- Look at Pool functionality
