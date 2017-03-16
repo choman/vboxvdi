@@ -85,6 +85,7 @@ class vboxvdi:
         self.options         = virtualbox.library.CloneOptions(1)
         self.active_sessions = {}
         self.timer           = {}
+        self.used            = {}
 
         self.PREFIX          = re.compile(r"^%s Clone" % self.BASE)
         self.clone_num       = re.compile(r"^%s Clone \(\d+\)" % self.BASE)
@@ -104,8 +105,12 @@ class vboxvdi:
             time.sleep(1)
 
             del self.vmlist[:]
-            [self.vmlist.append(vm) for vm in self.vbox.machines if self.PREFIX.search(vm.name)]
-            [self.active_sessions.setdefault(vm.name, False) for vm in self.vmlist]
+            for vm in self.vbox.machines:
+                if self.PREFIX.search(vm.name):
+                    self.vmlist.append(vm)
+                    self.initialize_trackers(vm.name)
+
+            self.getFreeCount()
 
 ##            [inuse.append(vm) for vm in self.vbox.machines if pool.search(vm.name)]
 
@@ -125,7 +130,37 @@ class vboxvdi:
 
             count += 1
 
+
+    def getFreeCount(self):
+        if 0:
+            tmp = []
+
+            for k, v in self.used.iteritems():
+                print k, v
+                if not v:
+                    tmp.append(k)
+            print len(tmp)
+
+        tmp = []
+        [tmp.append(k) for k, v in self.used.iteritems() if not v]
+        print len(tmp)
+
+        self.free_count = len(tmp)
+
     def check_pool(self):
+        self.getFreeCount()
+
+        print 
+        print 
+        print 
+        print 
+        print 
+        print 
+        print "Checking Pool:"
+        print "   - Total VMs:   ", len(self.active_sessions.values())
+        print "   - Free Size:   ", self.freesize
+        print "   - Free Count:  ", self.free_count
+
         for vm in self.vmlist:
             self.runstuff(vm.name)
 
@@ -133,14 +168,18 @@ class vboxvdi:
             print ("  - Name:   %s" % vm.name)
             print ("  - State:  %s" % vm.state)
             print ("  - Port:   %s" % vm.vrde_server.get_vrde_property("TCP/Ports"))
+            print ("  - Active: %s" % self.active_sessions[vm.name])
+            print ("  - Used:   %s" % self.used[vm.name])
 
-            if vm.name in self.active_sessions:
-                print ("  - Active: %s" % self.active_sessions[vm.name])
-            else:
-                print ("  - Active: Unknown")
+            if not self.used[vm.name]:
+                if self.free_count > self.freesize:
+                    x = time.time() - self.timer[vm.name]
 
-            session = self.mgr.get_session()
-    
+                    if x >= 120: # 300
+                        self.remove_vm(vm.name)
+                        self.removeTracker(vm.name)
+                        self.getFreeCount()
+                        #self.free_count -= 1
 
     def clone_vm(self):
         if self.cursize < self.initsize or self.free_count < self.freesize:
@@ -150,7 +189,18 @@ class vboxvdi:
             self.take_snapshot()
             self.launch_vm()
 
-            self.free_count += 1
+            #self.free_count += 1
+            self.initialize_trackers(self.clone.name)
+
+    def removeTracker(self, name):
+        del self.timer[vmname]
+        del self.active_sessions[vmname]
+        del self.used[vmname]
+
+    def initialize_trackers(self, vmname):
+        self.timer.setdefault(vmname, time.time())
+        self.active_sessions.setdefault(vmname, False)
+        self.used.setdefault(vmname, False)
 
     def __define_lock_types(self):
         SHARED_LOCK = LockType(1)
@@ -203,40 +253,46 @@ class vboxvdi:
         # because the password would stay out of the process tables.  But
         # for now... system call
         cmd = "%s guestcontrol '%s' --username %s --password %s run --exe /bin/ps" % (VBOXMANAGE, name, self.vdiadmin, self.vdipasswd)
-        fcmd = shlex.split(cmd.replace(self.vdipasswd, "******"))
-        cmd = shlex.split(cmd)
 
-        if DEBUG: print fcmd
+        if DEBUG:
+            print shlex.split(cmd.replace(self.vdipasswd, "******"))
+
+        cmd = shlex.split(cmd)
 
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
         stdout, stderr = p.communicate()
         #print "(%s)" % stdout
 
         if mate.search(stdout):
+##            if not self.active_sessions[name]:
+##                self.free_count           -= 1
+
             #we have a session
             #print "active session, "   #, stdout
             self.active_sessions[name] = True
-            self.free_count -= 1
-
-            if name in self.timer:
-                self.timer.pop(name)
+            self.used[name]            = True
+            self.timer[name]           = time.time()
+            
 
         else:
+            
             if self.active_sessions[name]:
                 print "inactive session"
                 # start idle timer
                 # stop idle timer
+                # inactive session, update timer and active
                 self.active_sessions[name] = False
-
-                if not name in self.timer:
-                    self.timer[name] = time.time()
+                self.timer[name]           = time.time()
                  
-            if name in self.timer:
-                x = time.time() -  self.timer[name]
+            if self.used[name]:
+                x = time.time() - self.timer[name]
 
                 if x >= 10: #self.recycle_timeout:
+                    print "Flashing"
                     self.restore_snapshot(name)
-                    self.timer.pop(name)
+                    self.used[name]   = False
+                    self.timer[name]  = time.time()
+                    #self.free_count  += 1
 
     def get_vrde_port(self):
         self.vm_port = self.beginning_port
@@ -329,21 +385,22 @@ class vboxvdi:
         p = session.console.power_down() 
         p.wait_for_completion(timeout=-1)
 
-        while True:
-            time.sleep(1)
-
-            if "PoweredOff" in a.state:
-                break
+##        while True:
+##            time.sleep(1)
+##
+##            if "PoweredOff" in a.state:
+##                break
 
         print a.state
 
 #        a.autostop_type = virtualbox.library.AutostopType(3)
         print "restore snapshot"
-        a.restore_snapshot()
+#        a.restore_snapshot()
 
         print "powering up"
-#        session = virtualbox.Session()
+        session = virtualbox.Session()
         a.launch_vm_process(session=session, type_p="headless")
+#        a.launch_vm_process(type_p="headless")
 #        session.console.power_up()
 
     def remove_vm(self, name):
