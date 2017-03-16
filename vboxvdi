@@ -84,7 +84,7 @@ class vboxvdi:
         self.state           = virtualbox.library.CloneMode(1)
         self.options         = virtualbox.library.CloneOptions(1)
         self.active_sessions = {}
-        self.timer = {}
+        self.timer           = {}
 
         self.PREFIX          = re.compile(r"^%s Clone" % self.BASE)
         self.clone_num       = re.compile(r"^%s Clone \(\d+\)" % self.BASE)
@@ -199,6 +199,9 @@ class vboxvdi:
 
     def runstuff(self, name):
 
+        # This may be possible via the pyvbox module, which would be good 
+        # because the password would stay out of the process tables.  But
+        # for now... system call
         cmd = "%s guestcontrol '%s' --username %s --password %s run --exe /bin/ps" % (VBOXMANAGE, name, self.vdiadmin, self.vdipasswd)
         fcmd = shlex.split(cmd.replace(self.vdipasswd, "******"))
         cmd = shlex.split(cmd)
