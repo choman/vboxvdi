@@ -79,6 +79,8 @@ class vboxvdi:
         self.data_dir        = self.vdi.config["pool"]["data_dir"]
         self.beginning_port  = self.vdi.config["pool"]["start_vrde_port"]
         self.vm_port         = self.beginning_port
+        self.recycle_timeout = self.vdi.config["pool"]["recycle_timeout"]
+        self.delete_timeout  = self.vdi.config["pool"]["delete_timeout"]
         self.state           = virtualbox.library.CloneMode(1)
         self.options         = virtualbox.library.CloneOptions(1)
         self.active_sessions = {}
@@ -103,6 +105,8 @@ class vboxvdi:
 
             del self.vmlist[:]
             [self.vmlist.append(vm) for vm in self.vbox.machines if self.PREFIX.search(vm.name)]
+            [self.active_sessions.setdefault(vm.name, False) for vm in self.vmlist]
+
 ##            [inuse.append(vm) for vm in self.vbox.machines if pool.search(vm.name)]
 
             self.free_count = self.cursize = len(self.vmlist)
@@ -194,7 +198,6 @@ class vboxvdi:
         print ("  - current_state_modified: %s" % self.BASE.current_state_modified)
 
     def runstuff(self, name):
-        self.active_sessions[name] = False
 
         cmd = "%s guestcontrol '%s' --username %s --password %s run --exe /bin/ps" % (VBOXMANAGE, name, self.vdiadmin, self.vdipasswd)
         fcmd = shlex.split(cmd.replace(self.vdipasswd, "******"))
@@ -217,19 +220,20 @@ class vboxvdi:
 
         else:
             if self.active_sessions[name]:
-                 print "inactive session"
-                 # start idle timer
-                 # stop idle timer
-                 self.active_sessions[name] = False
+                print "inactive session"
+                # start idle timer
+                # stop idle timer
+                self.active_sessions[name] = False
 
-                 if not name in self.timer:
-                     self.timer[name] = time.time()
+                if not name in self.timer:
+                    self.timer[name] = time.time()
                  
-                 x = time.time() -  self.timer[name]
+            if name in self.timer:
+                x = time.time() -  self.timer[name]
 
-                 if x >= 60:
-                     self.remove_vm(name)
-                     self.timer.pop(name)
+                if x >= 10: #self.recycle_timeout:
+                    self.restore_snapshot(name)
+                    self.timer.pop(name)
 
     def get_vrde_port(self):
         self.vm_port = self.beginning_port
@@ -308,6 +312,36 @@ class vboxvdi:
             pass
 
         self.session.unlock_machine()
+
+    def restore_snapshot(self, name):
+
+        print "HEY"
+        time.sleep(2)
+        a = self.vbox.find_machine(name)
+        session = self.mgr.get_session()
+        a.lock_machine(session, self.LOCKTYPE)
+
+
+        print "powering down"
+        p = session.console.power_down() 
+        p.wait_for_completion(timeout=-1)
+
+        while True:
+            time.sleep(1)
+
+            if "PoweredOff" in a.state:
+                break
+
+        print a.state
+
+#        a.autostop_type = virtualbox.library.AutostopType(3)
+        print "restore snapshot"
+        a.restore_snapshot()
+
+        print "powering up"
+#        session = virtualbox.Session()
+        a.launch_vm_process(session=session, type_p="headless")
+#        session.console.power_up()
 
     def remove_vm(self, name):
         a = self.vbox.find_machine(name)

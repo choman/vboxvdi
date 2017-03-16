@@ -24,3 +24,7 @@ IPVS:
 Graphical:
 - clone vms to pool (group) - in GUI, already separated on disk
 
+
+BUGS:
+- occassional vboxmange bug
+- memory leak
