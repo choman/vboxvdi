@@ -2,14 +2,14 @@ Todo
 
 General:
 - ~~launch clones after snapshot~~
-- setup as service
+- H: setup as service
 - ~~support config file~~
-- support program logging
+- H: support program logging
 - clone hdd not in pool
 - ~~remove idle machine if total count is > freesize~~
 
 Snapshots:
-- Currently deleting clone, reset snapshot after 1m (~~logged off or~~ powered down)
+- H: Currently deleting clone, reset snapshot after 1m (~~logged off or~~ powered down)
 
 VRDE
 - ~~track sessions of clones~~
@@ -34,7 +34,7 @@ BUGS:
 Future:
 - suspend vs remove
 - ~~human readable configfile~~
-- human readable computer terms
+- human readable computer terms, such as 2M
 - support persistant desktops
 - assignable machines (persistance)
 - thread cloning process - others?
