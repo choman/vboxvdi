@@ -13,7 +13,7 @@ Snapshots:
 - need speedier snapshot - issues in pyvbox?
 
 VRDE
-- track sessions of clones
+- ~~track sessions of clones~~
 
 IPVS:
 - glue to ipvsadm as machines are created
@@ -33,3 +33,5 @@ BUGS:
 Future:
 - suspend vs remove
 - human readable configfile
+- support persistant desktops
+- assignable machines (persistance)
