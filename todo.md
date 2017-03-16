@@ -10,7 +10,6 @@ General:
 
 Snapshots:
 - Currently deleting clone, reset snapshot after 1m (logged off or powered down)
-- need speedier snapshot - issues in pyvbox?
 
 VRDE
 - ~~track sessions of clones~~
@@ -27,6 +26,8 @@ Graphical:
 
 BUGS:
 - occassional vboxmange bug
+- vboxmanage timing
+- need speedier snapshot - issues in pyvbox?
 - memory leak
 
 
