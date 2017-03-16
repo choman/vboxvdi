@@ -4,6 +4,8 @@ import os
 import yaml
 import sys
 import subprocess
+#import humanfriendly
+import pytimeparse
 import shlex
 import time
 import virtualbox
@@ -26,7 +28,21 @@ class Config:
         with open("config.yml", 'r') as ymlfile:
             self.config = yaml.load(ymlfile)
 
+        self.convert_times()
         self.print_debug()
+
+    def convert_times(self):
+
+        for item in ["recycle_timeout", "delete_timeout"]:
+
+            print "b: ", self.config["pool"][item]
+
+            if not str(self.config["pool"][item]).isdigit():
+                x = pytimeparse.parse(self.config["pool"][item])
+                self.config["pool"][item] = x
+
+            print "a: ", self.config["pool"][item]
+
 
     def print_debug(self):
         if DEBUG:
@@ -175,7 +191,7 @@ class vboxvdi:
                 if self.free_count > self.freesize:
                     x = time.time() - self.timer[vm.name]
 
-                    if x >= 120: # 300
+                    if x >= self.delete_timeout:
                         self.remove_vm(vm.name)
                         self.removeTracker(vm.name)
                         self.getFreeCount()
@@ -218,9 +234,24 @@ class vboxvdi:
     def __session_state(self, event):
         print "Session %s state changed: %s" % (event.machine_id, event.state)
 
+    def __snapshot_taken(self, event):
+        print "Machine %s snapshot taken:" % (event.machine_id)
+
+    def __snapshot_deleted(self, event):
+        print "Machine %s snapshot deleted:" % (event.machine_id)
+
+    def __snapshot_changed(self, event):
+        print "Machine %s snapshot changed:" % (event.machine_id)
+
     def __callbacks(self):
+        # snapshot events
         self.vbox.register_on_machine_state_changed(self.__machine_state)
         self.vbox.register_on_session_state_changed(self.__session_state)
+
+        # snapshot events
+        self.vbox.register_on_snapshot_taken(self.__snapshot_taken)
+        self.vbox.register_on_snapshot_deleted(self.__snapshot_deleted)
+        self.vbox.register_on_snapshot_changed(self.__snapshot_changed)
 
     # Does defined BASE vm exist?
     def get_base_image(self):
@@ -287,7 +318,7 @@ class vboxvdi:
             if self.used[name]:
                 x = time.time() - self.timer[name]
 
-                if x >= 10: #self.recycle_timeout:
+                if x >= self.recycle_timeout:
                     print "Flashing"
                     self.restore_snapshot(name)
                     self.used[name]   = False
@@ -359,14 +390,18 @@ class vboxvdi:
         self.print_clone_info()
 
     def take_snapshot(self):
-        print "Taking snapshot: ", self.session.machine.current_snapshot
+        
+##        if not self.session.machine.current_snapshot.name:
+##           print "Taking snapshot: NA"
+##        else:
+##            print "Taking snapshot: ", self.session.machine.current_snapshot.name
 
         x, p = self.session.machine.take_snapshot("test1", "test2", True)
 
         print "waiting"
 
         try:
-            p.wait_for_completion(10)
+            p.wait_for_completion(timeout=-1)
         except:
             pass
 
@@ -395,25 +430,30 @@ class vboxvdi:
         process_wait(a, 'PoweredOff')
 
 #        a.autostop_type = virtualbox.library.AutostopType(3)
-        print "restore snapshot"
+        print "restore snapshot: ", a.current_snapshot.name
         a.lock_machine(session, self.LOCKTYPE)
         console = session.console
         snapshot = a.find_snapshot("test1")
-        p = console.restore_snapshot(snapshot)
+        p = session.machine.restore_snapshot(snapshot)
         p.wait_for_completion(timeout=-1)
 
-        print a.state
-        while True:
-            time.sleep(1)
+        print "a.state:", a.state
 
-            print a.state
-            if "PoweredOff" in str(a.state):
-                break
+        process_wait(a, 'PoweredOff')
 
-        print a.state
+        if 0:
+            while True:
+                time.sleep(1)
+
+                print a.state
+                if "PoweredOff" in str(a.state):
+                    break
+
+        print "a.state:", a.state
 
         print "powering up"
 #        session = virtualbox.Session()
+        session.unlock_machine()
         a.launch_vm_process(session=session, type_p="headless")
 #        a.launch_vm_process(type_p="headless")
 #        session.console.power_up()

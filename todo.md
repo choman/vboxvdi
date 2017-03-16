@@ -9,7 +9,7 @@ General:
 - ~~remove idle machine if total count is > freesize~~
 
 Snapshots:
-- Currently deleting clone, reset snapshot after 1m (logged off or powered down)
+- Currently deleting clone, reset snapshot after 1m (~~logged off or~~ powered down)
 
 VRDE
 - ~~track sessions of clones~~
@@ -33,7 +33,8 @@ BUGS:
 
 Future:
 - suspend vs remove
-- human readable configfile
+- ~~human readable configfile~~
+- human readable computer terms
 - support persistant desktops
 - assignable machines (persistance)
 - thread cloning process - others?
