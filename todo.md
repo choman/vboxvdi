@@ -5,8 +5,9 @@ General:
 - H: setup as service
 - ~~support config file~~
 - H: support program logging
-- clone hdd not in pool
+- M: clone hdd not in pool
 - ~~remove idle machine if total count is > freesize~~
+- H: baseimage update flow
 
 Snapshots:
 - H: Currently deleting clone, reset snapshot after 1m (~~logged off or~~ powered down)
@@ -15,29 +16,31 @@ VRDE
 - ~~track sessions of clones~~
 
 IPVS:
+- ipvs stuff
 - glue to ipvsadm as machines are created
     - ~~add line to port~~
     - ~~rm line to port~~
-    - check for orphaned ipvs entries and restarts
+    - M: check for orphaned ipvs entries and restarts
 
 Graphical:
-- clone vms to pool (group) - in GUI, already separated on disk
+- L: clone vms to pool (group) - in GUI, already separated on disk
 
 
 BUGS:
 - occassional vboxmange bug
 - vboxmanage timing
-- need speedier snapshot - issues in pyvbox?
-- memory leak
+- H: need speedier snapshot - issues in pyvbox?
+- H: memory leak
+- M: free machine > freesize mayu wack all machines to freesize
 
 
 Future:
-- suspend vs remove
+- M: suspend vs remove
 - ~~human readable configfile~~
-- human readable computer terms, such as 2M
-- support persistant desktops
-- assignable machines (persistance)
-- thread cloning process - others?
-- Look at Pool functionality
-- packer support
-- multipool support
+- M: human readable computer terms, such as 2M
+- M: support persistant desktops
+- L: assignable machines (persistance)
+- H: thread cloning process - others?
+- H: Look at Pool functionality
+- M: packer support
+- L: multipool support
