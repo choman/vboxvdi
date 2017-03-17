@@ -217,7 +217,6 @@ class vboxvdi:
             self.take_snapshot()
             self.launch_vm()
 
-            #self.free_count += 1
             self.initialize_trackers(self.clone.name)
 
     def removeTracker(self, vmname):
@@ -334,18 +333,13 @@ class vboxvdi:
         #print "(%s)" % stdout
 
         if mate.search(stdout):
-##            if not self.active_sessions[name]:
-##                self.free_count           -= 1
-
             #we have a session
             #print "active session, "   #, stdout
             self.active_sessions[name] = True
             self.used[name]            = True
             self.timer[name]           = time.time()
-            
 
         else:
-            
             if self.active_sessions[name]:
                 print "inactive session"
                 # start idle timer
@@ -353,8 +347,6 @@ class vboxvdi:
                 # inactive session, update timer and active
                 self.active_sessions[name] = False
                 self.timer[name]           = time.time()
-
-            #if self.recycle_desktops:
 
             if re.findall(r"%s" % POWEREDOFF_ABORTED, str(state)):
                 self.start_snapshot(name)
