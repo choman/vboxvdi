@@ -7,5 +7,7 @@ After "FirstOnline", a powered off machine states are:
 After "FirstOnline", a rebooted machine states are: N/A
 - no state changes where seen
 
+cloning seems to go in background?
+
 
 
