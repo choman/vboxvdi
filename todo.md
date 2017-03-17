@@ -8,9 +8,10 @@ General:
 - M: clone hdd not in pool
 - ~~remove idle machine if total count is > freesize~~
 - H: baseimage update flow
+- M: Link vs Machine clones
 
 Snapshots:
-- H: Currently deleting clone, reset snapshot after 1m (~~logged off or~~ powered down)
+- ~~H: reset snapshot after 1m (logged off or powered down)~~
 
 VRDE
 - ~~track sessions of clones~~
