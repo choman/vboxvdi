@@ -19,6 +19,8 @@ import virtualbox.library
 import virtualbox.library_ext
 import virtualbox.pool
 import re
+import logging
+#import asyncio
 
 
 POWEREDOFF = "PoweredOff"
@@ -30,6 +32,7 @@ mate       = re.compile(r"mate-session")
 VBOXMANAGE = "/usr/bin/vboxmanage"
 
 DEBUG = False
+
 
 class Config:
     def __init__(self):
@@ -78,11 +81,20 @@ class IPVS:
 
 class vboxvdi:
     def __init__(self):
+
         inuse  = []
         count  = 0
 
         self.vdi  = Config()
         self.xray = IPVS()
+
+        self.setup_logger()
+
+  
+        self.logger.info('Start Program')
+
+        self.logger.debug('Reading config')
+        self.logger.info('Reading config')
 
 #        print self.vdi.config["pool"]
 
@@ -110,6 +122,8 @@ class vboxvdi:
         self.PREFIX           = re.compile(r"^%s Clone" % self.BASE)
         self.clone_num        = re.compile(r"^%s Clone \(\d+\)" % self.BASE)
 
+
+
         self.vbox = virtualbox.VirtualBox()
         self.mgr  = virtualbox.Manager()
 
@@ -127,7 +141,8 @@ class vboxvdi:
         self.Pool    = multiprocessing.Pool(6)
         self.Queue   = multiprocessing.Queue(6)
 
-        jobs = []
+        jobs    = []
+        threads = []
 
         while True:
 
@@ -149,17 +164,25 @@ class vboxvdi:
 
             if self.cursize >= self.maxcount: continue
 
-            if 1: 
+            if 0: 
                 self.clone_vm()
             else:
-                if 1:
+                if 0:
                     self.process = multiprocessing.Process(target=self.clone_vm, args=[])
                     jobs.append(self.process)
                     self.process.start()
                     print (self.Queue.get())
                     self.process.join()
-                else:
+
+                if 0:
                     self.Pool.map_async(self.clone_vm, []).get(3)
+
+                if 1:
+                    t = threading.Thread(target=self.clone_vm, args=())
+                    threads.append(t)
+                    t.start()
+                    t.join()
+
 
             if 0:
                 # simulate removing vm
@@ -168,6 +191,28 @@ class vboxvdi:
                     self.remove_vm("tetsing Clone (3)")
 
             count += 1
+
+    def setup_logger(self):
+        logging.basicConfig(level=logging.INFO,
+                            format='%(relativeCreated)6d %(threadName)s %(message)s')
+#                            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        self.logger    = logging.getLogger(__name__)
+        self.logger.setLevel(logging.INFO)
+
+        self.logfile   = logging.FileHandler("log.info")
+        self.errorfile = logging.FileHandler("log.err")
+
+        self.logfile.setLevel(logging.INFO)
+        self.errorfile.setLevel(logging.ERROR)
+
+        self.formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        self.logfile.setFormatter(self.formatter)
+        self.errorfile.setFormatter(self.formatter)
+
+        self.logger.addHandler(self.logfile)
+        self.logger.addHandler(self.errorfile)
+         
+        self.logger = logging.getLogger(__name__)
 
     def handler(self, signum, frame):
          print ('Exiting...')
@@ -192,16 +237,15 @@ class vboxvdi:
     def check_pool(self):
         self.getFreeCount()
 
-        print 
-        print 
-        print 
-        print 
-        print 
-        print 
-        print "Checking Pool:"
-        print "   - Total VMs:   ", len(self.active_sessions.values())
-        print "   - Free Size:   ", self.freesize
-        print "   - Free Count:  ", self.free_count
+        self.logger.info("")
+        self.logger.info("")
+        self.logger.info("")
+        self.logger.info("")
+        self.logger.info("Checking Pool:")
+
+        self.logger.info("   - Total VMs:   %s", len(self.active_sessions.values()))
+        self.logger.info("   - Free Size:   %s", self.freesize)
+        self.logger.info("   - Free Count:  %s", self.free_count)
 
         for vm in self.vmlist:
             self.runstuff(vm.name, vm.state)
@@ -316,18 +360,18 @@ class vboxvdi:
         self.print_base_image_info()
 
     def print_vbox_info(self):
-        print ("")
-        print ("VirtualBox Info:")
-        print ("  - version: %s" % self.vbox.version)
+        self.logger.info("")
+        self.logger.info("VirtualBox Info:")
+        self.logger.info("  - version: %s" % self.vbox.version)
 
     def print_base_image_info(self):
-        print ("")
-        print ("Base Image Info:")
-        print ("  - Name:  %s" % self.BASE.name)
-        print ("  - State: %s" % self.BASE.state)
-##        print ("  - (%s)" % self.BASE.vrde_server)
-        print ("  - cpu_count: %s" % self.BASE.cpu_count)
-        print ("  - current_state_modified: %s" % self.BASE.current_state_modified)
+        self.logger.info("")
+        self.logger.info("Base Image Info:")
+        self.logger.info("  - Name:  %s" % self.BASE.name)
+        self.logger.info("  - State: %s" % self.BASE.state)
+##        self.logger.info("  - (%s)" % self.BASE.vrde_server)
+        self.logger.info("  - cpu_count: %s" % self.BASE.cpu_count)
+        self.logger.info("  - current_state_modified: %s" % self.BASE.current_state_modified)
 
     def runstuff(self, name, state):
 
@@ -401,10 +445,13 @@ class vboxvdi:
         print ("") 
         print ("Begin cloning:")
 
+        # this apparently has a built in p.wait_for_completeion(-1)
         self.clone = virtualbox.library.IMachine.clone(self.BASE,
                                         mode=self.CLONE_MODE,
                                         groups=["/pool"],
                                         basefolder=self.data_dir)
+
+        
     def testing(self, event):
         print "Machine %s vrde changed: %s" % (event.machine_id, event.state)
 
