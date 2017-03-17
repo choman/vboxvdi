@@ -39,3 +39,5 @@ Future:
 - assignable machines (persistance)
 - thread cloning process - others?
 - Look at Pool functionality
+- packer support
+- multipool support
