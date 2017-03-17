@@ -99,8 +99,6 @@ class vboxvdi:
         self.vm_port         = self.beginning_port
         self.recycle_timeout = self.vdi.config["pool"]["recycle_timeout"]
         self.delete_timeout  = self.vdi.config["pool"]["delete_timeout"]
-        self.state           = virtualbox.library.CloneMode(1)
-        self.options         = virtualbox.library.CloneOptions(1)
         self.active_sessions = {}
         self.timer           = {}
         self.used            = {}
@@ -149,7 +147,6 @@ class vboxvdi:
                     self.remove_vm("tetsing Clone (3)")
 
             count += 1
-
 
     def getFreeCount(self):
         if 0:
