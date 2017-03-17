@@ -34,6 +34,9 @@ BUGS:
 - H: memory leak
 - M: free machine > freesize mayu wack all machines to freesize
 
+TEST:
+- persistance on powered off vms
+
 
 Future:
 - M: suspend vs remove
