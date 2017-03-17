@@ -4,6 +4,8 @@ import os
 import yaml
 import sys
 import subprocess
+import threading
+import multiprocessing
 #import humanfriendly
 import pytimeparse
 import shlex
@@ -27,6 +29,8 @@ DEBUG = False
 
 class Config:
     def __init__(self):
+        self.times = ["recycle_timeout", "delete_timeout"]
+
         with open("config.yml", 'r') as ymlfile:
             self.config = yaml.load(ymlfile)
 
@@ -35,16 +39,11 @@ class Config:
 
     def convert_times(self):
 
-        for item in ["recycle_timeout", "delete_timeout"]:
-
-            print "b: ", self.config["pool"][item]
+        for item in self.times:
 
             if not str(self.config["pool"][item]).isdigit():
                 x = pytimeparse.parse(self.config["pool"][item])
                 self.config["pool"][item] = x
-
-            print "a: ", self.config["pool"][item]
-
 
     def print_debug(self):
         if DEBUG:
