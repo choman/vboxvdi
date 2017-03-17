@@ -354,17 +354,17 @@ class vboxvdi:
                 self.active_sessions[name] = False
                 self.timer[name]           = time.time()
 
-            if self.recycle_desktops:
-                print "Recycling: ", str(state)
-                x = time.time() - self.timer[name]
+            #if self.recycle_desktops:
 
-                if re.findall(r"%s" % POWEREDOFF_ABORTED, str(state)):
-                    self.start_snapshot(x, name)
+            if re.findall(r"%s" % POWEREDOFF_ABORTED, str(state)):
+                self.start_snapshot(name)
                  
-                if self.used[name]:
-                    self.start_snapshot(x, name)
+            if self.used[name]:
+                self.start_snapshot(name)
 
-    def start_snapshot(self, x, name):
+    def start_snapshot(self, name):
+        x = time.time() - self.timer[name]
+
         if x >= self.recycle_timeout:
             print "Flashing"
             self.restore_snapshot(name)
@@ -487,8 +487,10 @@ class vboxvdi:
             self.pwait = session.machine.restore_snapshot(snapshot)
             process_wait(a, POWEREDOFF)
 
-        print "powering up"
-        session.unlock_machine()
+        print "powering up ", session.state
+        if "Locked" in str(session.state):
+            session.unlock_machine()
+
         a.launch_vm_process(session=session, type_p="headless")
 
     def remove_vm(self, name):
