@@ -35,14 +35,17 @@ BUGS:
 - M: free machine > freesize mayu wack all machines to freesize
 
 TEST:
-- persistance on powered off vms
-
+- persistance of powered off vms
+- persistance of logged off vms
+- recyle of logged off machine
+- recyle of powered off machine
+- human readable configfile, for times
 
 Future:
 - M: suspend vs remove
 - ~~human readable configfile~~
 - M: human readable computer terms, such as 2M
-- M: support persistant desktops
+- ~~M: support persistant desktops~~
 - L: assignable machines (persistance)
 - H: thread cloning process - others?
 - H: Look at Pool functionality
