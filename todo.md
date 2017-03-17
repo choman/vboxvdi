@@ -2,10 +2,11 @@ Todo
 
 General:
 - H: setup as service
-- H: support program logging
 - H: baseimage update flow
 - M: clone hdd not in pool
 - M: Link vs Machine clones
+- L: add logging as I go
+- ~~H: support program logging~~
 - ~~L: capture ctrl-c errors~~
 - ~~launch clones after snapshot~~
 - ~~support config file~~
@@ -30,6 +31,8 @@ Graphical:
 
 
 BUGS:
+- H: initial clone is creating as script is moving forward, need blocker
+     - false i think, api does a wait_for_completion
 - H: need speedier snapshot - issues in pyvbox?
 - H: memory leak?
 - occassional vboxmange bug
