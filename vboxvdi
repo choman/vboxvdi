@@ -20,8 +20,13 @@ import virtualbox.pool
 import re
 
 
-pool      = re.compile(r'\d+$')
-mate      = re.compile(r"mate-session")
+POWEREDOFF = "PoweredOff"
+ABORTED    = "Aborted"
+
+POWEREDOFF_ABORTED = "%s|%s" % (POWEREDOFF, ABORTED)
+
+pool       = re.compile(r'\d+$')
+mate       = re.compile(r"mate-session")
 
 VBOXMANAGE = "/usr/bin/vboxmanage"
 
@@ -82,28 +87,29 @@ class vboxvdi:
 
 #        print self.vdi.config["pool"]
 
-        self.vdiadmin        = self.vdi.config["general"]["vdiadmin"]
-        self.vdipasswd       = self.vdi.config["general"]["vdipasswd"]
-        self.BASE            = self.vdi.config["pool"]["base_image"]
+        self.vdiadmin         = self.vdi.config["general"]["vdiadmin"]
+        self.vdipasswd        = self.vdi.config["general"]["vdipasswd"]
+        self.BASE             = self.vdi.config["pool"]["base_image"]
 
-        self.initsize        = self.vdi.config["pool"]["initial_size"]
-        self.freesize        = self.vdi.config["pool"]["free_size"]
-        self.free_count      = 0
-        self.maxcount        = self.vdi.config["pool"]["max_size"]
-        self.vmlist          = []
-        self.cpu_count       = self.vdi.config["pool"]["cpu_count"]
-        self.memory_size     = self.vdi.config["pool"]["mem_size"]
-        self.data_dir        = self.vdi.config["pool"]["data_dir"]
-        self.beginning_port  = self.vdi.config["pool"]["start_vrde_port"]
-        self.vm_port         = self.beginning_port
-        self.recycle_timeout = self.vdi.config["pool"]["recycle_timeout"]
-        self.delete_timeout  = self.vdi.config["pool"]["delete_timeout"]
-        self.active_sessions = {}
-        self.timer           = {}
-        self.used            = {}
+        self.initsize         = self.vdi.config["pool"]["initial_size"]
+        self.freesize         = self.vdi.config["pool"]["free_size"]
+        self.free_count       = 0
+        self.maxcount         = self.vdi.config["pool"]["max_size"]
+        self.vmlist           = []
+        self.cpu_count        = self.vdi.config["pool"]["cpu_count"]
+        self.memory_size      = self.vdi.config["pool"]["mem_size"]
+        self.data_dir         = self.vdi.config["pool"]["data_dir"]
+        self.beginning_port   = self.vdi.config["pool"]["start_vrde_port"]
+        self.vm_port          = self.beginning_port
+        self.recycle_timeout  = self.vdi.config["pool"]["recycle_timeout"]
+        self.delete_timeout   = self.vdi.config["pool"]["delete_timeout"]
+        self.recycle_desktops = self.vdi.config["pool"]["recycle_desktops"]
+        self.active_sessions  = {}
+        self.timer            = {}
+        self.used             = {}
 
-        self.PREFIX          = re.compile(r"^%s Clone" % self.BASE)
-        self.clone_num       = re.compile(r"^%s Clone \(\d+\)" % self.BASE)
+        self.PREFIX           = re.compile(r"^%s Clone" % self.BASE)
+        self.clone_num        = re.compile(r"^%s Clone \(\d+\)" % self.BASE)
 
         self.vbox = virtualbox.VirtualBox()
         self.mgr  = virtualbox.Manager()
@@ -116,6 +122,8 @@ class vboxvdi:
         self.__define_clone_options()
 
         self.get_base_image()
+        self.process = multiprocessing.Process(target=self.clone_vm)
+        self.Pool    = multiprocessing.Pool(6)
 
         while True:
 
@@ -137,7 +145,12 @@ class vboxvdi:
 
             if self.cursize >= self.maxcount: continue
 
-            self.clone_vm()
+            if 1: 
+                self.clone_vm()
+            else:
+                self.process = multiprocessing.Process(target=self.clone_vm)
+                self.process.start()
+                self.process.join()
 
             if 0:
                 # simulate removing vm
@@ -178,7 +191,7 @@ class vboxvdi:
         print "   - Free Count:  ", self.free_count
 
         for vm in self.vmlist:
-            self.runstuff(vm.name)
+            self.runstuff(vm.name, vm.state)
 
             print ("")
             print ("  - Name:   %s" % vm.name)
@@ -195,7 +208,6 @@ class vboxvdi:
                         self.remove_vm(vm.name)
                         self.removeTracker(vm.name)
                         self.getFreeCount()
-                        #self.free_count -= 1
 
     def clone_vm(self):
         if self.cursize < self.initsize or self.free_count < self.freesize:
@@ -305,7 +317,7 @@ class vboxvdi:
         print ("  - cpu_count: %s" % self.BASE.cpu_count)
         print ("  - current_state_modified: %s" % self.BASE.current_state_modified)
 
-    def runstuff(self, name):
+    def runstuff(self, name, state):
 
         # This may be possible via the pyvbox module, which would be good 
         # because the password would stay out of the process tables.  But
@@ -341,16 +353,23 @@ class vboxvdi:
                 # inactive session, update timer and active
                 self.active_sessions[name] = False
                 self.timer[name]           = time.time()
-                 
-            if self.used[name]:
+
+            if self.recycle_desktops:
+                print "Recycling: ", str(state)
                 x = time.time() - self.timer[name]
 
-                if x >= self.recycle_timeout:
-                    print "Flashing"
-                    self.restore_snapshot(name)
-                    self.used[name]   = False
-                    self.timer[name]  = time.time()
-                    #self.free_count  += 1
+                if re.findall(r"%s" % POWEREDOFF_ABORTED, str(state)):
+                    self.start_snapshot(x, name)
+                 
+                if self.used[name]:
+                    self.start_snapshot(x, name)
+
+    def start_snapshot(self, x, name):
+        if x >= self.recycle_timeout:
+            print "Flashing"
+            self.restore_snapshot(name)
+            self.used[name]   = False
+            self.timer[name]  = time.time()
 
     def get_vrde_port(self):
         self.vm_port = self.beginning_port
@@ -377,8 +396,8 @@ class vboxvdi:
         print ("") 
         print ("Begin cloning:")
 
+#                                        mode=self.CLONE_MODE,
         self.clone = virtualbox.library.IMachine.clone(self.BASE,
-                                        mode=self.CLONE_MODE,
                                         groups=["/pool"],
                                         basefolder=self.data_dir)
     def testing(self, event):
@@ -453,19 +472,19 @@ class vboxvdi:
         time.sleep(2)
         a = self.vbox.find_machine(name)
         session = self.mgr.get_session()
-        a.lock_machine(session, self.LOCKTYPE)
 
-        print "powering down"
-        self.pwait = session.console.power_down() 
-        process_wait(a, 'PoweredOff')
+        if not re.findall(r"%s" % POWEREDOFF_ABORTED, str(a.state)):
+            a.lock_machine(session, self.LOCKTYPE)
+            print "powering down"
+            self.pwait = session.console.power_down() 
+            process_wait(a, POWEREDOFF)
 
         print "restore snapshot: ", a.current_snapshot.name
         a.lock_machine(session, self.LOCKTYPE)
         console = session.console
         snapshot = a.find_snapshot("test1")
-        p = session.machine.restore_snapshot(snapshot)
-        p.wait_for_completion(timeout=-1)
-        process_wait(a, 'PoweredOff')
+        self.pwait = session.machine.restore_snapshot(snapshot)
+        process_wait(a, POWEREDOFF)
 
         print "powering up"
         session.unlock_machine()
