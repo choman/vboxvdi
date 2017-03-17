@@ -1,15 +1,15 @@
 Todo
 
 General:
-- ~~launch clones after snapshot~~
 - H: setup as service
-- ~~support config file~~
 - H: support program logging
-- M: clone hdd not in pool
-- ~~remove idle machine if total count is > freesize~~
 - H: baseimage update flow
+- M: clone hdd not in pool
 - M: Link vs Machine clones
-- L: capture ctrl-c errors
+- ~~L: capture ctrl-c errors~~
+- ~~launch clones after snapshot~~
+- ~~support config file~~
+- ~~remove idle machine if total count is > freesize~~
 
 
 Snapshots:
@@ -30,11 +30,11 @@ Graphical:
 
 
 BUGS:
+- H: need speedier snapshot - issues in pyvbox?
+- H: memory leak?
 - occassional vboxmange bug
 - vboxmanage timing
-- H: need speedier snapshot - issues in pyvbox?
-- H: memory leak
-- M: free machine > freesize mayu wack all machines to freesize
+- free machine > freesize may wack all machines to freesize
 
 TEST:
 - persistance of powered off vms
@@ -44,12 +44,12 @@ TEST:
 - human readable configfile, for times
 
 Future:
-- M: suspend vs remove
-- ~~human readable configfile~~
-- M: human readable computer terms, such as 2M
-- ~~M: support persistant desktops~~
-- L: assignable machines (persistance)
 - H: thread cloning process - others?
-- H: Look at Pool functionality
+- M: Look at Pool functionality
+- M: suspend vs remove
+- M: human readable computer terms, such as 2M
 - M: packer support
+- L: assignable machines (persistance)
 - L: multipool support
+- ~~human readable configfile~~
+- ~~M: support persistant desktops~~
