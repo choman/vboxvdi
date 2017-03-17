@@ -446,6 +446,7 @@ class vboxvdi:
         print ("Begin cloning:")
 
         # this apparently has a built in p.wait_for_completeion(-1)
+                                        #mode=self.CLONE_MODE,
         self.clone = virtualbox.library.IMachine.clone(self.BASE,
                                         mode=self.CLONE_MODE,
                                         groups=["/pool"],
