@@ -9,6 +9,8 @@ General:
 - ~~remove idle machine if total count is > freesize~~
 - H: baseimage update flow
 - M: Link vs Machine clones
+- L: capture ctrl-c errors
+
 
 Snapshots:
 - ~~H: reset snapshot after 1m (logged off or powered down)~~
