@@ -479,12 +479,13 @@ class vboxvdi:
             self.pwait = session.console.power_down() 
             process_wait(a, POWEREDOFF)
 
-        print "restore snapshot: ", a.current_snapshot.name
-        a.lock_machine(session, self.LOCKTYPE)
-        console = session.console
-        snapshot = a.find_snapshot("test1")
-        self.pwait = session.machine.restore_snapshot(snapshot)
-        process_wait(a, POWEREDOFF)
+        if self.recycle_desktops:
+            print "restore snapshot: ", a.current_snapshot.name
+            a.lock_machine(session, self.LOCKTYPE)
+            console = session.console
+            snapshot = a.find_snapshot("test1")
+            self.pwait = session.machine.restore_snapshot(snapshot)
+            process_wait(a, POWEREDOFF)
 
         print "powering up"
         session.unlock_machine()
