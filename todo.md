@@ -1,6 +1,7 @@
 Todo
 
 General:
+- H: install.sh script
 - H: setup as service
 - H: baseimage update flow
 - M: clone hdd not in pool
