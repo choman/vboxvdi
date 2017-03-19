@@ -1,7 +1,6 @@
 Todo
 
 General:
-- H: install.sh script
 - H: setup as service
 - H: baseimage update flow
 - M: clone hdd not in pool
@@ -12,6 +11,12 @@ General:
 - ~~launch clones after snapshot~~
 - ~~support config file~~
 - ~~remove idle machine if total count is > freesize~~
+
+INSTALL:
+- ~~H: install.sh script~~
+- ~~M: vbox~~
+- ~~M: lynis~~
+- ~~M: meld~~
 
 
 Snapshots:
