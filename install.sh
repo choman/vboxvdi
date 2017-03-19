@@ -24,10 +24,22 @@ sudo apt-fast dist-upgrade -y
 
 
 # install hypervisor
-sudo apt-fast install -y python-pytimeparse python-yaml
-echo "vdiadmin ALL=(ALL) NOPASSWD: /home/vdiadmin/vboxvdi/ipvsadd.sh" to /etc/sudoers
+sudo apt-fast install -y python-pytimeparse python-yaml ipvsadm meld
+
+sudo mkdir -p /opt/vboxvdi
+sudo cp -pr * /opt/vboxvdi
+echo "vdiadmin ALL=(ALL) NOPASSWD: /opt/vboxvdi/ipvsadd.sh" to /etc/sudoers
 
 
+#VBOX
+echo "deb http://download.virtualbox.org/virtualbox/debian yakkety contrib" | sudo tee /etc/apt/sources.list.d/vbox.list
+wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -
+sudo apt-get update -qq
+sudo apt-get install -y virtualbox-5.1
+
+#LYNIS
+aria2c -x 8 https://cisofy.com/files/lynis-2.4.6.tar.gz
+sudo tar xvpf lynis-2.4.6.tar.gz -C /opt
 
 
 #
