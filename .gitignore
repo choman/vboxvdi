@@ -2,4 +2,5 @@ config.yml
 Oracle_VM_VirtualBox_Extension_Pack-5.1.18.vbox-extpack
 log.*
 lynis-2.4.6.tar.gz
+packer*
 
