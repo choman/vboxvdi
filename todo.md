@@ -13,12 +13,13 @@ General:
 - ~~remove idle machine if total count is > freesize~~
 
 INSTALL:
+- L: completions
+- L: cheat
 - ~~H: install.sh script~~
 - ~~M: vbox~~
 - ~~M: lynis~~
 - ~~M: meld~~
-- L: completions
-- L: cheat
+- ~~L: packer~~
 
 
 Snapshots:
@@ -59,8 +60,8 @@ Future:
 - M: Look at Pool functionality
 - M: suspend vs remove
 - M: human readable computer terms, such as 2M
-- M: packer support
 - L: assignable machines (persistance)
 - L: multipool support
+- ~~M: packer support~~
 - ~~human readable configfile~~
 - ~~M: support persistant desktops~~
