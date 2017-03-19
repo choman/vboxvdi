@@ -34,6 +34,11 @@ sudo cp -pr * /opt/vboxvdi
 echo "vdiadmin ALL=(ALL) NOPASSWD: /opt/vboxvdi/ipvsadd.sh" to /etc/sudoers
 
 
+# firewall stuff
+sudo ufw enable
+sudo ufw allow 3389
+
+
 #VBOX
 echo "deb http://download.virtualbox.org/virtualbox/debian yakkety contrib" | sudo tee /etc/apt/sources.list.d/vbox.list
 wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -
