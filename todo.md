@@ -17,6 +17,8 @@ INSTALL:
 - ~~M: vbox~~
 - ~~M: lynis~~
 - ~~M: meld~~
+- L: completions
+- L: cheat
 
 
 Snapshots:
