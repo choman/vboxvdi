@@ -1,9 +1,11 @@
 Todo
 
+Document
+
 General:
 - H: setup as service
 - H: baseimage update flow
-- M: clone hdd not in pool
+- M: clone hdd not in pool (link vs machine clones)
 - M: Link vs Machine clones
 - L: add logging as I go
 - ~~H: support program logging~~
