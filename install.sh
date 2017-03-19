@@ -17,6 +17,9 @@ sudo apt-get install -y di git axel ssh apt-fast vlock tmux
 #####################################
 # need silent install of apt-fast
 #####################################
+./clean.sh
+
+
 
 #
 # update system 
@@ -38,18 +41,23 @@ sudo apt-get update -qq
 sudo apt-get install -y virtualbox-5.1
 
 
+AFLAGS="--allow-overwrite=true --auto-file-renaming=false --conditional-get=true"
 
 aria2c -x 8 -d /tmp http://download.virtualbox.org/virtualbox/LATEST.TXT
 version=$(cat /tmp/LATEST.TXT)
-aria2c -x 8 http://download.virtualbox.org/virtualbox/${version}/Oracle_VM_VirtualBox_Extension_Pack-${version}.vbox-extpack
+aria2c -x 8 $AFLAGS http://download.virtualbox.org/virtualbox/${version}/Oracle_VM_VirtualBox_Extension_Pack-${version}.vbox-extpack
 
 # prompts for passwd
 #vboxmanage extpack install Oracle_VM_VirtualBox_Extension_Pack-5.1.18.vbox-extpack
 
 
 #LYNIS
-aria2c -x 8 https://cisofy.com/files/lynis-2.4.6.tar.gz
+aria2c -x 8 $AFLAGS https://cisofy.com/files/lynis-2.4.6.tar.gz
 sudo tar xvpf lynis-2.4.6.tar.gz -C /opt
+
+
+aria2c -x 8 $AFLAGS https://releases.hashicorp.com/packer/0.12.3/packer_0.12.3_linux_amd64.zip
+unzip packer_0.12.3_linux_amd64.zip
 
 
 #
