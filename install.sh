@@ -37,6 +37,16 @@ wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-
 sudo apt-get update -qq
 sudo apt-get install -y virtualbox-5.1
 
+
+
+aria2c -x 8 -d /tmp http://download.virtualbox.org/virtualbox/LATEST.TXT
+version=$(cat /tmp/LATEST.TXT)
+aria2c -x 8 http://download.virtualbox.org/virtualbox/${version}/Oracle_VM_VirtualBox_Extension_Pack-${version}.vbox-extpack
+
+# prompts for passwd
+#vboxmanage extpack install Oracle_VM_VirtualBox_Extension_Pack-5.1.18.vbox-extpack
+
+
 #LYNIS
 aria2c -x 8 https://cisofy.com/files/lynis-2.4.6.tar.gz
 sudo tar xvpf lynis-2.4.6.tar.gz -C /opt
