@@ -20,7 +20,6 @@ sudo apt-get install -y di git axel ssh apt-fast vlock tmux
 ./clean.sh
 
 
-
 #
 # update system 
 sudo apt-fast dist-upgrade -y
