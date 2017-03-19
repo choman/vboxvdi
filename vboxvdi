@@ -83,7 +83,6 @@ class vboxvdi:
     def __init__(self):
 
         inuse  = []
-        count  = 0
 
         self.vdi  = Config()
         self.xray = IPVS()
@@ -182,15 +181,6 @@ class vboxvdi:
                     threads.append(t)
                     t.start()
                     t.join()
-
-
-            if 0:
-                # simulate removing vm
-                print count
-                if count == 15:
-                    self.remove_vm("tetsing Clone (3)")
-
-            count += 1
 
     def setup_logger(self):
         logging.basicConfig(level=logging.INFO,
