@@ -3,10 +3,10 @@ Todo
 Document
 
 General:
-- H: setup as service
-- M: clone hdd not in pool (link vs machine clones)
-- M: Link vs Machine clones
-- L: add logging as I go
+- TAGGED H: setup as service
+- TAGGED M: clone hdd not in pool (link vs machine clones)
+- TAGGED M: Link vs Machine clones
+- TAGGED L: add logging as I go
 - ~~H: baseimage update flow~~
 - ~~H: support program logging~~
 - ~~L: capture ctrl-c errors~~
@@ -15,8 +15,8 @@ General:
 - ~~remove idle machine if total count is > freesize~~
 
 INSTALL:
-- L: completions
-- L: cheat
+- TAGGED ~~L: completions~~
+- TAGGED ~~L: cheat~~
 - ~~H: install.sh script~~
 - ~~M: vbox~~
 - ~~M: lynis~~
@@ -24,7 +24,7 @@ INSTALL:
 - ~~L: packer~~
 
 Update --> Reclone: Issues from "baseimage update flow"
-- M: update clones only when base is powered off
+- TAGGED M: update clones only when base is powered off
 - ~~H: machines in use have issue when become not in use, crashes script~~
 - ~~M: Need a way to track used machines if script/servie is restarted~~
 
@@ -36,25 +36,25 @@ VRDE
 
 IPVS:
 - ipvs stuff
-- glue to ipvsadm as machines are created
+- TAGGED ~~glue to ipvsadm as machines are created~~
     - ~~add line to port~~
     - ~~rm line to port~~
-    - M: check for orphaned ipvs entries and restarts
+    - TAGGED ~~M: check for orphaned ipvs entries and restarts~~
 
 Graphical:
-- L: clone vms to pool (group) - in GUI, already separated on disk
+- TAGGED L: clone vms to pool (group) - in GUI, already separated on disk
 
 Unseen Issues:
-- traking reclones may have issue is dict contains ghost mchines
+- TAGGED ~~traking reclones may have issue is dict contains ghost mchines~~
 
 BUGS:
 - H: initial clone is creating as script is moving forward, need blocker
      - false i think, api does a wait_for_completion
 - H: need speedier snapshot - issues in pyvbox?
 - H: memory leak?
-- occassional vboxmange bug
-- vboxmanage timing
 - free machine > freesize may wack all machines to freesize
+- TAGGED ~~occassional vboxmange bug~~
+- TAGGED ~~vboxmanage timing~~
 
 TEST:
 - persistance of powered off vms
@@ -64,13 +64,13 @@ TEST:
 - human readable configfile, for times
 
 Future:
-- H: thread cloning process - others?
-- M: Look at Pool functionality
-- M: suspend vs remove
-- M: human readable computer terms, such as 2M
-- L: assignable machines (persistance)
-- L: multipool support
 - Performace enhancements
+- TAGGED ~~H: thread cloning process - others?~~
+- TAGGED ~~M: human readable computer terms, such as 2M~~
+- TAGGED ~~M: Look at Pool functionality~~
+- TAGGED ~~M: suspend vs remove~~
+- TAGGED ~~L: assignable machines (persistance)~~
+- TAGGED ~~L: multipool support~~
 - ~~M: packer support~~
 - ~~human readable configfile~~
 - ~~M: support persistant desktops~~
