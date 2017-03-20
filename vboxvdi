@@ -20,16 +20,18 @@ import virtualbox.library_ext
 import virtualbox.pool
 import re
 import logging
+import pickle
 #import asyncio
 
 
-POWEREDOFF = "PoweredOff"
-ABORTED    = "Aborted"
+POWEREDOFF  = "PoweredOff"
+ABORTED     = "Aborted"
 
-pool       = re.compile(r'\d+$')
-mate       = re.compile(r"mate-session")
+pool        = re.compile(r'\d+$')
+mate        = re.compile(r"mate-session")
 
-VBOXMANAGE = "/usr/bin/vboxmanage"
+VBOXMANAGE  = "/usr/bin/vboxmanage"
+PICKLE_FILE = "/var/tmp/vboxvdi.p"
 
 DEBUG = False
 
@@ -121,6 +123,7 @@ class vboxvdi:
         self.reclone          = {}
         self.current_snapshot = ""
 
+
         self.PREFIX           = re.compile(r"^%s Clone" % self.BASE)
         self.clone_num        = re.compile(r"^%s Clone \(\d+\)" % self.BASE)
 
@@ -135,6 +138,8 @@ class vboxvdi:
         self.__define_clone_modes()
         self.__define_clone_options()
 
+        self.__getPickle()
+
         signal.signal(signal.SIGINT, self.handler)
 
         self.get_base_image()
@@ -145,6 +150,7 @@ class vboxvdi:
         jobs    = []
         threads = []
 
+#    def myrun(self):
         while True:
 
             time.sleep(1)
@@ -183,6 +189,13 @@ class vboxvdi:
                     threads.append(t)
                     t.start()
                     t.join()
+
+    def __savePickle(self):
+        pickle.dump(self.reclone, open(PICKLE_FILE, "wb"))
+
+    def __getPickle(self):
+        if os.path.exists(PICKLE_FILE):
+            self.reclone = pickle.load(open(PICKLE_FILE, "rb"))
 
     def setup_logger(self):
         logging.basicConfig(level=logging.INFO,
@@ -258,6 +271,8 @@ class vboxvdi:
         self.logger.info("   - Total VMs:   %s", len(self.active_sessions.values()))
         self.logger.info("   - Free Size:   %s", self.freesize)
         self.logger.info("   - Free Count:  %s", self.free_count)
+
+        self.__savePickle()
 
         for vm in self.vmlist:
             self.runstuff(vm.name, vm.state)
@@ -612,6 +627,8 @@ class vboxvdi:
 
 if __name__ == "__main__":
     a = vboxvdi()
+    #a.myrun()
+
     ##try:
     ##    a = vboxvdi()
     ##except KeyboardInterrupt:
