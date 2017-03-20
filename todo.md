@@ -48,11 +48,11 @@ Unseen Issues:
 - TAGGED ~~traking reclones may have issue is dict contains ghost mchines~~
 
 BUGS:
-- H: initial clone is creating as script is moving forward, need blocker
-     - false i think, api does a wait_for_completion
-- H: need speedier snapshot - issues in pyvbox?
-- H: memory leak?
-- free machine > freesize may wack all machines to freesize
+- TAGGED ~~free machine > freesize may wack all machines to freesize~~
+- TAGGED ~~H: initial clone is creating as script is moving forward, need blocker~~
+     - ~~false i think, api does a wait_for_completion~~
+- TAGGED ~~H: memory leak?~~
+- TAGGED ~~H: need speedier snapshot - issues in pyvbox?~~
 - TAGGED ~~occassional vboxmange bug~~
 - TAGGED ~~vboxmanage timing~~
 
@@ -64,7 +64,7 @@ TEST:
 - human readable configfile, for times
 
 Future:
-- Performace enhancements
+- TAGGED ~~Performace enhancements~~
 - TAGGED ~~H: thread cloning process - others?~~
 - TAGGED ~~M: human readable computer terms, such as 2M~~
 - TAGGED ~~M: Look at Pool functionality~~
