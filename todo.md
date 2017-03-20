@@ -24,9 +24,9 @@ INSTALL:
 - ~~L: packer~~
 
 Update --> Reclone: Issues from "baseimage update flow"
-- H: machines in use have issue when not in use, crashes script
+- H: machines in use have issue when become not in use, crashes script
 - M: update clones only when base is powered off
-- M: Need a way to track used machines if script/servie is restarted
+- ~~M: Need a way to track used machines if script/servie is restarted~~
 
 Snapshots:
 - ~~H: reset snapshot after 1m (logged off or powered down)~~
