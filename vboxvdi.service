@@ -1,0 +1,19 @@
+[Unit]
+Description=VBOX VDI agent
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=vdiadmin
+ExecStart=/opt/vboxvdi/vboxvdi
+WorkingDirectory=/opt/vboxvdi
+#ExecStart=/home/choman/vboxvdi/vboxvdi
+#WorkingDirectory=/opt/vboxvdi
+Restart=always
+RestartSec=3
+StandardOutput=syslog
+StandardError=syslog
+
+[Install]
+WantedBy=multi-user.target
