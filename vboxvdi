@@ -435,13 +435,17 @@ class vboxvdi:
                 self.active_sessions[name] = False
                 self.timer[name]           = time.time()
 
+            if self.reclone:
+                self.used[name]   = False
+                return
+
             if str(state) in [POWEREDOFF, ABORTED]:
-                self.start_snapshot(name)
+                self.reset_snapshot(name)
 
             if self.used[name]:
-                self.start_snapshot(name)
+                self.reset_snapshot(name)
 
-    def start_snapshot(self, name):
+    def reset_snapshot(self, name):
         x = time.time() - self.timer[name]
 
         if x >= self.recycle_timeout:
