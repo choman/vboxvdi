@@ -23,6 +23,9 @@ INSTALL:
 - ~~M: meld~~
 - ~~L: packer~~
 
+Update --> Reclone:
+- M: update clones only when base is powered off
+- M: Need a way to track used machines if script/servie is restarted
 
 Snapshots:
 - ~~H: reset snapshot after 1m (logged off or powered down)~~
@@ -46,7 +49,6 @@ BUGS:
      - false i think, api does a wait_for_completion
 - H: need speedier snapshot - issues in pyvbox?
 - H: memory leak?
-- M: update clones only when base is powered off
 - occassional vboxmange bug
 - vboxmanage timing
 - free machine > freesize may wack all machines to freesize
