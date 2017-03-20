@@ -44,6 +44,8 @@ IPVS:
 Graphical:
 - L: clone vms to pool (group) - in GUI, already separated on disk
 
+Unseen Issues:
+- traking reclones may have issue is dict contains ghost mchines
 
 BUGS:
 - H: initial clone is creating as script is moving forward, need blocker
