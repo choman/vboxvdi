@@ -4,10 +4,10 @@ Document
 
 General:
 - H: setup as service
-- H: baseimage update flow
 - M: clone hdd not in pool (link vs machine clones)
 - M: Link vs Machine clones
 - L: add logging as I go
+- ~~H: baseimage update flow~~
 - ~~H: support program logging~~
 - ~~L: capture ctrl-c errors~~
 - ~~launch clones after snapshot~~
@@ -23,7 +23,7 @@ INSTALL:
 - ~~M: meld~~
 - ~~L: packer~~
 
-Update --> Reclone:
+Update --> Reclone: Issues from "baseimage update flow"
 - M: update clones only when base is powered off
 - M: Need a way to track used machines if script/servie is restarted
 
