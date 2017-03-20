@@ -73,7 +73,13 @@ greeter-show-manual-login=true
 greeter-hide-users=true    
 EOF
 
-
+# vboxvdi service
+echo "Setup service"
+sudo -s cp -v vboxvdi.service /etc/systemd/system
+sudo systemctl daemon-reload
+sudo systemctl enable vboxvdi
+sudo systemctl start vboxvdi
+sudo systemctl status vboxvdi
 
 # UFW setup
 
