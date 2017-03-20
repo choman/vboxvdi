@@ -24,8 +24,8 @@ INSTALL:
 - ~~L: packer~~
 
 Update --> Reclone: Issues from "baseimage update flow"
-- H: machines in use have issue when become not in use, crashes script
 - M: update clones only when base is powered off
+- ~~H: machines in use have issue when become not in use, crashes script~~
 - ~~M: Need a way to track used machines if script/servie is restarted~~
 
 Snapshots:
@@ -70,6 +70,7 @@ Future:
 - M: human readable computer terms, such as 2M
 - L: assignable machines (persistance)
 - L: multipool support
+- Performace enhancements
 - ~~M: packer support~~
 - ~~human readable configfile~~
 - ~~M: support persistant desktops~~
