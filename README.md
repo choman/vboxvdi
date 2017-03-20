@@ -9,7 +9,7 @@ featyre
 
 ## Requirements
 VirtualBox must be installed on server.  
-Uses vBoxRDP VirtualBox RDP server by default, should work with other RDP servers, but not tested.
+Uses vRDP VirtualBox RDP server by default, should work with other RDP servers, but not tested.
 The install.sh script should take care of most of the requirements but to be thorough.  This script needs the following and should install them automatically:
  
  - ipvsadm (the current broker)
