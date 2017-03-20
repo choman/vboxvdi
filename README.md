@@ -4,7 +4,7 @@
 
 Create a VDI like implementation with VirtualBox that fully supports 
 rdp'ing to any type of client (windows or linux) via virtualbox's vrdp
-featyre
+feature.
 
 
 ## Requirements
