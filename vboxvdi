@@ -24,14 +24,15 @@ import pickle
 #import asyncio
 
 
-POWEREDOFF  = "PoweredOff"
-ABORTED     = "Aborted"
+POWEREDOFF   = "PoweredOff"
+ABORTED      = "Aborted"
+SNAPSHOT_FIX = 1
 
-pool        = re.compile(r'\d+$')
-mate        = re.compile(r"mate-session")
-
-VBOXMANAGE  = "/usr/bin/vboxmanage"
-PICKLE_FILE = "/var/tmp/vboxvdi.p"
+pool         = re.compile(r'\d+$')
+mate         = re.compile(r"mate-session")
+ 
+VBOXMANAGE   = "/usr/bin/vboxmanage"
+PICKLE_FILE  = "/var/tmp/vboxvdi.p"
 
 DEBUG = False
 
@@ -57,11 +58,11 @@ class Config:
     def print_debug(self):
         if DEBUG:
             for section in self.config:
-                print(section)
+                self.logger.debug(section)
 
-            print(self.config['general'])
-            print(self.config['pool'])
-            print(self.config['pool']['data_dir'])
+            self.logger.debug(self.config['general'])
+            self.logger.debug(self.config['pool'])
+            self.logger.debug(self.config['pool']['data_dir'])
 
 class IPVS:
     def __init__(self, port=None):
@@ -97,7 +98,7 @@ class vboxvdi:
         self.logger.debug('Reading config')
         self.logger.info('Reading config')
 
-#        print self.vdi.config["pool"]
+#        self.logger.info(self.vdi.config["pool"])
 
         self.vdiadmin         = self.vdi.config["general"]["vdiadmin"]
         self.vdipasswd        = self.vdi.config["general"]["vdipasswd"]
@@ -178,7 +179,7 @@ class vboxvdi:
                     self.process = multiprocessing.Process(target=self.clone_vm, args=[])
                     jobs.append(self.process)
                     self.process.start()
-                    print (self.Queue.get())
+                    self.logger.info (self.Queue.get())
                     self.process.join()
 
                 if 0:
@@ -220,7 +221,7 @@ class vboxvdi:
         self.logger = logging.getLogger(__name__)
 
     def handler(self, signum, frame):
-        print ('Exiting...')
+        self.logger.info('Exiting...')
         sys.exit()
 
     def getFreeCount(self):
@@ -228,14 +229,14 @@ class vboxvdi:
             tmp = []
 
             for k, v in self.used.iteritems():
-                print k, v
+                self.logger.debug( k, v)
                 if not v:
                     tmp.append(k)
-            print len(tmp)
+            self.logger.debug(len(tmp))
 
         tmp = []
         [tmp.append(k) for k, v in self.used.iteritems() if not v]
-        print len(tmp)
+        self.logger.info(len(tmp))
 
         self.free_count = len(tmp)
 
@@ -257,12 +258,12 @@ class vboxvdi:
         for vm in self.vmlist:
             self.runstuff(vm.name, vm.state)
 
-            print ("")
-            print ("  - Name:   %s" % vm.name)
-            print ("  - State:  %s" % vm.state)
-            print ("  - Port:   %s" % vm.vrde_server.get_vrde_property("TCP/Ports"))
-            print ("  - Active: %s" % self.active_sessions[vm.name])
-            print ("  - Used:   %s" % self.used[vm.name])
+            self.logger.info ("")
+            self.logger.info ("  - Name:   %s" % vm.name)
+            self.logger.info ("  - State:  %s" % vm.state)
+            self.logger.info ("  - Port:   %s" % vm.vrde_server.get_vrde_property("TCP/Ports"))
+            self.logger.info ("  - Active: %s" % self.active_sessions[vm.name])
+            self.logger.info ("  - Used:   %s" % self.used[vm.name])
 
             if not self.used[vm.name]:
                 if self.reclone[vm.name]:
@@ -340,22 +341,22 @@ class vboxvdi:
         self.LOCKTYPE = SHARED_LOCK
 
     def __machine_state(self, event):
-        print "Machine %s state changed: %s" % (event.machine_id, event.state)
+        self.logger.info("Machine %s state changed: %s" % (event.machine_id, event.state))
 
     def __session_state(self, event):
-        print "Session %s state changed: %s" % (event.machine_id, event.state)
+        self.logger.info("Session %s state changed: %s" % (event.machine_id, event.state))
 
     def __snapshot_taken(self, event):
-        print "Machine %s snapshot taken:" % (event.machine_id)
+        self.logger.info("Machine %s snapshot taken:" % (event.machine_id))
         if self.BASE.id_p == event.machine_id:
             for vm in self.vmlist:
                 self.reclone[vm.name] = True
 
     def __snapshot_deleted(self, event):
-        print "Machine %s snapshot deleted:" % (event.machine_id)
+        self.logger.info("Machine %s snapshot deleted:" % (event.machine_id))
 
     def __snapshot_changed(self, event):
-        print "Machine %s snapshot changed:" % (event.machine_id)
+        self.logger.info("Machine %s snapshot changed:" % (event.machine_id))
 
     def __callbacks(self):
         # snapshot events
@@ -376,16 +377,18 @@ class vboxvdi:
             self.BASE = self.vbox.find_machine(self.BASE)
             
         except:
-            print ("ERROR: base machine missing: %s" % self.BASE)
+            self.logger.erro("ERROR: base machine missing: %s" % self.BASE)
             sys.exit()
 
         self.print_base_image_info()
         y = self.BASE.current_snapshot
         self.current_snapshot = y.name
-        print y.name
-        print y.children
-        print y.parent
-        print y.get_children_count()
+
+        # Debug
+        self.logger.info( y.name)
+        self.logger.info(y.children)
+        self.logger.info(y.parent)
+        self.logger.info(y.get_children_count())
 
     def print_vbox_info(self):
         self.logger.info("")
@@ -411,24 +414,22 @@ class vboxvdi:
         cmd = "%s guestcontrol '%s' --username %s --password %s run --exe /bin/ps" % (VBOXMANAGE, name, self.vdiadmin, self.vdipasswd)
 
         if DEBUG:
-            print shlex.split(cmd.replace(self.vdipasswd, "******"))
+            self.logger.debug(shlex.split(cmd.replace(self.vdipasswd, "******")))
 
         cmd = shlex.split(cmd)
 
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
         stdout, stderr = p.communicate()
-        #print "(%s)" % stdout
 
         if mate.search(stdout):
             #we have a session
-            #print "active session, "   #, stdout
             self.active_sessions[name] = True
             self.used[name]            = True
             self.timer[name]           = time.time()
 
         else:
             if self.active_sessions[name]:
-                print "inactive session"
+                self.logger.info("inactive session")
                 # start idle timer
                 # stop idle timer
                 # inactive session, update timer and active
@@ -449,7 +450,7 @@ class vboxvdi:
         x = time.time() - self.timer[name]
 
         if x >= self.recycle_timeout:
-            print "Flashing"
+            self.logger.info("Flashing")
             self.restore_snapshot(name)
             self.used[name]   = False
             self.timer[name]  = time.time()
@@ -464,21 +465,21 @@ class vboxvdi:
             self.vm_port += int(output)
 
     def print_clone_info(self):
-        print ("")
-        print ("  - Name:         %s"  % self.clone.name)
-        print ("  - ID:           %s"  % self.clone.id_p)
-        print ("  - State;        %s"  % self.session.state)
-        print ("  - memory_size:  %sM" % self.clone.memory_size)
-        print ("  - cpu_count:    %s"  % self.clone.cpu_count)
-        print ("  - OS:           %s"  % self.clone.os_type_id)
-#        print ("  - SnapShot:     %s"  % self.clone.current_snapshot.name)
-        print ("  - Snapshots:    %s"  % self.clone.snapshot_count)
-        print ("  - Groups:       %s"  % self.clone.groups)
-#        print ("  - Guest Props:  %s"  % self.clone.enumerate_guest_properties(""))
+        self.logger.info("")
+        self.logger.info("  - Name:         %s"  % self.clone.name)
+        self.logger.info("  - ID:           %s"  % self.clone.id_p)
+        self.logger.info("  - State;        %s"  % self.session.state)
+        self.logger.info("  - memory_size:  %sM" % self.clone.memory_size)
+        self.logger.info("  - cpu_count:    %s"  % self.clone.cpu_count)
+        self.logger.info("  - OS:           %s"  % self.clone.os_type_id)
+#        self.logger.info("  - SnapShot:     %s"  % self.clone.current_snapshot.name)
+        self.logger.info("  - Snapshots:    %s"  % self.clone.snapshot_count)
+        self.logger.info("  - Groups:       %s"  % self.clone.groups)
+#        self.logger.info("  - Guest Props:  %s"  % self.clone.enumerate_guest_properties(""))
 
     def clone_base_image(self):
-        print ("")
-        print ("Begin cloning:")
+        self.logger.info("")
+        self.logger.info("Begin cloning:")
 
         # this apparently has a built in p.wait_for_completeion(-1)
                                         #mode=self.CLONE_MODE,
@@ -489,7 +490,7 @@ class vboxvdi:
 
 
     def testing(self, event):
-        print "Machine %s vrde changed: %s" % (event.machine_id, event.state)
+        self.logger.info( "Machine %s vrde changed: %s" % (event.machine_id, event.state))
 
     def get_session(self):
         self.session = self.mgr.get_session()
@@ -511,15 +512,15 @@ class vboxvdi:
         #    session.machine.groups = "/pool"
         self.session.machine.memory_size = self.memory_size
         self.session.machine.cpu_count   = self.cpu_count
-        print ""
-        print "Groups: ", self.session.machine.groups
-        print "groups: ", type(self.session.machine.groups)
+        self.logger.info("")
+        self.logger.info("Groups: %s" % self.session.machine.groups)
+        self.logger.info("groups: %s" % type(self.session.machine.groups))
         del self.session.machine.groups[:]
-        print "Groups: ", self.session.machine.groups
+        self.logger.info("Groups: %s" % self.session.machine.groups)
         self.session.machine.groups.append("/pool")
-        print "Groups: ", self.session.machine.groups
+        self.logger.info("Groups: %s" % self.session.machine.groups)
 
-#        print "vrde: ", self.session.vrde_server_info
+#        self.logger.info("vrde: ", self.session.vrde_server_info)
 
         self.session.machine.save_settings()
         self.print_clone_info()
@@ -531,9 +532,9 @@ class vboxvdi:
         self.clone.lock_machine(self.session, self.LOCKTYPE)
         x, p = self.session.machine.take_snapshot("test1", "test2", True)
 
-        print "waiting, "
+        self.logger.info("waiting... ")
 
-        if 1:
+        if SNAPSHOT_FIX:
             try:
                 p.wait_for_completion(timeout=-1)
             except:
@@ -541,7 +542,7 @@ class vboxvdi:
         else:
             p.wait_for_completion(timeout=-1)
 
-        print "snapsnot: ", x
+        self.logger.info("snapsnot: %s" % x)
         self.session.unlock_machine()
 
 
@@ -556,26 +557,25 @@ class vboxvdi:
                 if state in str(item.state):
                     break
 
-        print "HEY"
         time.sleep(2)
         a = self.vbox.find_machine(name)
         session = self.mgr.get_session()
 
         if not str(a.state) in [POWEREDOFF, ABORTED]:
             a.lock_machine(session, self.LOCKTYPE)
-            print "powering down"
+            self.logger.info("powering down")
             self.pwait = session.console.power_down()
             process_wait(a, POWEREDOFF)
 
         if self.recycle_desktops:
-            print "restore snapshot: ", a.current_snapshot.name
+            self.logger.info("restore snapshot: %s" % a.current_snapshot.name)
             a.lock_machine(session, self.LOCKTYPE)
             console = session.console
             snapshot = a.find_snapshot("test1")
             self.pwait = session.machine.restore_snapshot(snapshot)
             process_wait(a, POWEREDOFF)
 
-        print "powering up ", session.state
+        self.logger.info("powering up %s" %  session.state)
         if "Locked" in str(session.state):
             session.unlock_machine()
 
@@ -599,15 +599,6 @@ class vboxvdi:
             self.clone.launch_vm_process(session=self.session, type_p="headless")
 
 #        self.session.console.register_on_vrde_server_changed(self.testing)
-
-    def runme(self):
-        pass
-
-    def vmcount(self, vmprefix):
-        cmd = VBOXMANAGE + "list vms"
-        cmd = shlex.split(cmd)
-##        while subprocess.Popen(cmd, stdout=subprocess.PIPE) as proc:
-##            print proc.stdout.read()
 
 if __name__ == "__main__":
     a = vboxvdi()
