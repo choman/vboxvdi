@@ -10,6 +10,7 @@ feature.
 ## Requirements
 VirtualBox must be installed on server.   
 Create at least one VirtualBox VM to be used as the template.     
+Edit config.yaml with the file name of the base image.  
 Uses vRDP VirtualBox RDP server by default, should work with other RDP servers, but not tested.   
 
 The install.sh script should take care of most of the requirements but to be thorough.  This script needs the following and should install them automatically:
