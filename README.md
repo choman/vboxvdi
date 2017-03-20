@@ -18,6 +18,7 @@ The install.sh script should take care of most of the requirements but to be tho
  - ipvsadm (the current broker)
  - python-pytimeparse
  - python-yaml
+ - pyvbox
 
 
 
