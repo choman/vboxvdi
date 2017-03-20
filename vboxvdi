@@ -89,7 +89,7 @@ class vboxvdi:
 
         self.setup_logger()
 
-  
+
         self.logger.info('Start Program')
 
         self.logger.debug('Reading config')
@@ -114,13 +114,15 @@ class vboxvdi:
         self.recycle_timeout  = self.vdi.config["pool"]["recycle_timeout"]
         self.delete_timeout   = self.vdi.config["pool"]["delete_timeout"]
         self.recycle_desktops = self.vdi.config["pool"]["recycle_desktops"]
+        self.trackers         = {}
         self.active_sessions  = {}
         self.timer            = {}
         self.used             = {}
+        self.reclone          = {}
+        self.current_snapshot = ""
 
         self.PREFIX           = re.compile(r"^%s Clone" % self.BASE)
         self.clone_num        = re.compile(r"^%s Clone \(\d+\)" % self.BASE)
-
 
 
         self.vbox = virtualbox.VirtualBox()
@@ -163,7 +165,7 @@ class vboxvdi:
 
             if self.cursize >= self.maxcount: continue
 
-            if 0: 
+            if 0:
                 self.clone_vm()
             else:
                 if 0:
@@ -201,12 +203,12 @@ class vboxvdi:
 
         self.logger.addHandler(self.logfile)
         self.logger.addHandler(self.errorfile)
-         
+
         self.logger = logging.getLogger(__name__)
 
     def handler(self, signum, frame):
-         print ('Exiting...')
-         sys.exit()
+        print ('Exiting...')
+        sys.exit()
 
     def getFreeCount(self):
         if 0:
@@ -223,6 +225,26 @@ class vboxvdi:
         print len(tmp)
 
         self.free_count = len(tmp)
+
+    def reclone_pool(self):
+        print "Start recloning"
+
+        for vm in self.vmlist:
+            self.runstuff(vm.name, vm.state)
+
+            print ("")
+            print ("  - Name:   %s" % vm.name)
+            print ("  - State:  %s" % vm.state)
+            print ("  - Port:   %s" % vm.vrde_server.get_vrde_property("TCP/Ports"))
+            print ("  - Active: %s" % self.active_sessions[vm.name])
+            print ("  - Used:   %s" % self.used[vm.name])
+
+            if not self.used[vm.name]:
+                x = time.time() - self.timer[vm.name]
+
+                self.remove_vm(vm.name)
+                self.removeTracker(vm.name)
+                self.getFreeCount()
 
     def check_pool(self):
         self.getFreeCount()
@@ -248,13 +270,20 @@ class vboxvdi:
             print ("  - Used:   %s" % self.used[vm.name])
 
             if not self.used[vm.name]:
-                if self.free_count > self.freesize:
+                if self.reclone[vm.name]:
+                    self.remove_vm(vm.name)
+                    self.removeTracker(vm.name)
+                    self.getFreeCount()
+
+                elif self.free_count > self.freesize:
                     x = time.time() - self.timer[vm.name]
 
                     if x >= self.delete_timeout:
                         self.remove_vm(vm.name)
                         self.removeTracker(vm.name)
                         self.getFreeCount()
+
+
 
     def clone_vm(self):
         if self.cursize < self.initsize or self.free_count < self.freesize:
@@ -270,11 +299,13 @@ class vboxvdi:
         del self.timer[vmname]
         del self.active_sessions[vmname]
         del self.used[vmname]
+        del self.reclone[vmname]
 
     def initialize_trackers(self, vmname):
         self.timer.setdefault(vmname, time.time())
         self.active_sessions.setdefault(vmname, False)
         self.used.setdefault(vmname, False)
+        self.reclone.setdefault(vmname, False)
 
     def __define_clone_modes(self):
         MACHINE_STATE             = CloneMode(1)
@@ -321,6 +352,9 @@ class vboxvdi:
 
     def __snapshot_taken(self, event):
         print "Machine %s snapshot taken:" % (event.machine_id)
+        if self.BASE.id_p == event.machine_id:
+            for vm in self.vmlist:
+                self.reclone[vm.name] = True
 
     def __snapshot_deleted(self, event):
         print "Machine %s snapshot deleted:" % (event.machine_id)
@@ -341,13 +375,22 @@ class vboxvdi:
     # Does defined BASE vm exist?
     def get_base_image(self):
 
+        saveme = self.BASE
+
         try:
             self.BASE = self.vbox.find_machine(self.BASE)
+            
         except:
             print ("ERROR: base machine missing: %s" % self.BASE)
             sys.exit()
-        
+
         self.print_base_image_info()
+        y = self.BASE.current_snapshot
+        self.current_snapshot = y.name
+        print y.name
+        print y.children
+        print y.parent
+        print y.get_children_count()
 
     def print_vbox_info(self):
         self.logger.info("")
@@ -358,14 +401,16 @@ class vboxvdi:
         self.logger.info("")
         self.logger.info("Base Image Info:")
         self.logger.info("  - Name:  %s" % self.BASE.name)
+        self.logger.info("  - ID:  %s" % self.BASE.id_p)
         self.logger.info("  - State: %s" % self.BASE.state)
 ##        self.logger.info("  - (%s)" % self.BASE.vrde_server)
         self.logger.info("  - cpu_count: %s" % self.BASE.cpu_count)
         self.logger.info("  - current_state_modified: %s" % self.BASE.current_state_modified)
+        self.logger.info("  - Snapshot count: %s" % self.BASE.snapshot_count)
 
     def runstuff(self, name, state):
 
-        # This may be possible via the pyvbox module, which would be good 
+        # This may be possible via the pyvbox module, which would be good
         # because the password would stay out of the process tables.  But
         # for now... system call
         cmd = "%s guestcontrol '%s' --username %s --password %s run --exe /bin/ps" % (VBOXMANAGE, name, self.vdiadmin, self.vdipasswd)
@@ -397,7 +442,7 @@ class vboxvdi:
 
             if str(state) in [POWEREDOFF, ABORTED]:
                 self.start_snapshot(name)
-                 
+
             if self.used[name]:
                 self.start_snapshot(name)
 
@@ -418,7 +463,7 @@ class vboxvdi:
             end   = self.clone.name.find(')')
             output = self.clone.name[start:end]
             self.vm_port += int(output)
-             
+
     def print_clone_info(self):
         print ("")
         print ("  - Name:         %s"  % self.clone.name)
@@ -427,12 +472,13 @@ class vboxvdi:
         print ("  - memory_size:  %sM" % self.clone.memory_size)
         print ("  - cpu_count:    %s"  % self.clone.cpu_count)
         print ("  - OS:           %s"  % self.clone.os_type_id)
+#        print ("  - SnapShot:     %s"  % self.clone.current_snapshot.name)
         print ("  - Snapshots:    %s"  % self.clone.snapshot_count)
         print ("  - Groups:       %s"  % self.clone.groups)
 #        print ("  - Guest Props:  %s"  % self.clone.enumerate_guest_properties(""))
-    
+
     def clone_base_image(self):
-        print ("") 
+        print ("")
         print ("Begin cloning:")
 
         # this apparently has a built in p.wait_for_completeion(-1)
@@ -442,7 +488,7 @@ class vboxvdi:
                                         groups=["/pool"],
                                         basefolder=self.data_dir)
 
-        
+
     def testing(self, event):
         print "Machine %s vrde changed: %s" % (event.machine_id, event.state)
 
@@ -461,7 +507,7 @@ class vboxvdi:
 
         vrde.set_vrde_property("TCP/Ports", "%s" % self.vm_port)
         self.xray.add(self.vm_port)
-        
+
 
         #    session.machine.groups = "/pool"
         self.session.machine.memory_size = self.memory_size
@@ -480,7 +526,7 @@ class vboxvdi:
         self.print_clone_info()
 
     def take_snapshot(self):
-        
+
         #x, p = self.clone.take_snapshot("test1", "test2", True)
         self.session.unlock_machine()
         self.clone.lock_machine(self.session, self.LOCKTYPE)
@@ -519,7 +565,7 @@ class vboxvdi:
         if not str(a.state) in [POWEREDOFF, ABORTED]:
             a.lock_machine(session, self.LOCKTYPE)
             print "powering down"
-            self.pwait = session.console.power_down() 
+            self.pwait = session.console.power_down()
             process_wait(a, POWEREDOFF)
 
         if self.recycle_desktops:
@@ -542,7 +588,7 @@ class vboxvdi:
         self.xray.delete(a.vrde_server.get_vrde_property("TCP/Ports"))
 
         a.remove()
-         
+
     def launch_vm(self):
 
         #refresh session
