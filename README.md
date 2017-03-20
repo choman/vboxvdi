@@ -3,7 +3,8 @@
 ## Description
 
 Create a VDI like implementation with VirtualBox that fully supports 
-rdp'ing to any type of client (windows or linux) via virtualbox's vrdp
+rdp'ing from any type of client (windows or linux), thick or thin to 
+clonable persistent/non-persistance desktops via virtualbox's vrdp
 feature.
 
 
