@@ -239,26 +239,6 @@ class vboxvdi:
 
         self.free_count = len(tmp)
 
-    def reclone_pool(self):
-        print "Start recloning"
-
-        for vm in self.vmlist:
-            self.runstuff(vm.name, vm.state)
-
-            print ("")
-            print ("  - Name:   %s" % vm.name)
-            print ("  - State:  %s" % vm.state)
-            print ("  - Port:   %s" % vm.vrde_server.get_vrde_property("TCP/Ports"))
-            print ("  - Active: %s" % self.active_sessions[vm.name])
-            print ("  - Used:   %s" % self.used[vm.name])
-
-            if not self.used[vm.name]:
-                x = time.time() - self.timer[vm.name]
-
-                self.remove_vm(vm.name)
-                self.removeTracker(vm.name)
-                self.getFreeCount()
-
     def check_pool(self):
         self.getFreeCount()
 
