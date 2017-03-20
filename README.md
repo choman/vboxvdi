@@ -8,9 +8,10 @@ feature.
 
 
 ## Requirements
-VirtualBox must be installed on server. 
-Create at least one VirtualBox VM to be used as the template.  
-Uses vRDP VirtualBox RDP server by default, should work with other RDP servers, but not tested.
+VirtualBox must be installed on server.   
+Create at least one VirtualBox VM to be used as the template.     
+Uses vRDP VirtualBox RDP server by default, should work with other RDP servers, but not tested.   
+
 The install.sh script should take care of most of the requirements but to be thorough.  This script needs the following and should install them automatically:
  
  - ipvsadm (the current broker)
