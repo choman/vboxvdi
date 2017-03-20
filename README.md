@@ -1,4 +1,4 @@
-# vbodi
+# vboxvdi
 
 ## Description
 
@@ -9,7 +9,7 @@ featyre
 
 ## Requirements
 
-The install.sh script should take care of most of the requirements, but 
+The install.sh script should take care of most of the requirements except your chose rdp client, but 
 to be thorough.  This script needs
  
  - ipvsadm (the current broker)
