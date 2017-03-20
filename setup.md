@@ -1,3 +1,5 @@
+This file is depricated via the install.sh script
+
 Eventually this should be a script
  
 
@@ -6,5 +8,6 @@ Eventually this should be a script
 - pytimeparse install
 - yaml install
 - add "username ALL=(ALL) NOPASSWD: /home/choman/vboxvdi/ipvsadd.sh" to /etc/sudoers
+
 
 
