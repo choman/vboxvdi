@@ -1,7 +1,5 @@
 #!/bin/bash
 
-##SERVERIP=192.168.2.50
-
 echo "Dpkg::Progress-Fancy \"1\";" | sudo tee /etc/apt/apt.conf.d/99progressbar
 
 #
