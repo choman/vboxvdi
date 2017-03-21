@@ -42,6 +42,7 @@ echo "vdiadmin ALL=(ALL) NOPASSWD: /opt/vboxvdi/ipvsadd.sh" to /etc/sudoers
 
 # firewall stuff
 sudo ufw enable
+sudo ufw allow 22
 sudo ufw allow 3389
 
 
