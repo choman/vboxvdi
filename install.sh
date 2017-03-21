@@ -67,9 +67,8 @@ sudo tar xvpf lynis-2.4.6.tar.gz -C /opt
 
 #
 # install pyvbox
-git clone https://pypi.python.org/pypi/pyvbox
-cd pyvbox
-sudo python setup.py install
+git clone https://github.com/mjdorma/pyvbox
+(cd pyvbox; sudo python setup.py install)
 
 
 aria2c -x 8 $AFLAGS https://releases.hashicorp.com/packer/0.12.3/packer_0.12.3_linux_amd64.zip
