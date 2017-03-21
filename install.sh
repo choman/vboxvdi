@@ -39,8 +39,8 @@ sudo ufw allow 3389
 #VBOX
 echo "deb http://download.virtualbox.org/virtualbox/debian yakkety contrib" | sudo tee /etc/apt/sources.list.d/vbox.list
 wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -
-sudo apt-get update -qq
-sudo apt-get install -y virtualbox-5.1
+sudo apt-fast update -qq
+sudo apt-fast install -y virtualbox-5.1
 
 
 AFLAGS="--allow-overwrite=true --auto-file-renaming=false --conditional-get=true"
@@ -50,7 +50,7 @@ version=$(cat /tmp/LATEST.TXT)
 aria2c -x 8 $AFLAGS http://download.virtualbox.org/virtualbox/${version}/Oracle_VM_VirtualBox_Extension_Pack-${version}.vbox-extpack
 
 # prompts for passwd
-#vboxmanage extpack install Oracle_VM_VirtualBox_Extension_Pack-5.1.18.vbox-extpack
+sudo vboxmanage extpack install Oracle_VM_VirtualBox_Extension_Pack-5.1.18.vbox-extpack
 
 
 #LYNIS
