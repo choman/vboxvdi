@@ -94,6 +94,9 @@ sudo systemctl status vboxvdi
 vdipass='$6$VULZjok1$8V7YYoddIJ23UCSQYI1Xua63ES1Qs6gJuWjt2HWAZCBmjJPqndQVgWBZfJ1HRosKfYpQE1ZUNqXffaaonj/6g/'
 VDI_SSH_HOME=/home/VDI/.ssh
 sudo useradd -s /bin/bash -m vdiadmin -p $vdipass
+sudo usermod -a -G vboxusers vdiadmin
+sudo usermod -a -G vboxusers $USER
+sudo usermod -a -G vdiadmin $USER
 
 sudo mkdir -v /vdi 
 sudo chown vdiadmin:vdiadmin /vdi 
