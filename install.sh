@@ -32,7 +32,7 @@ sudo apt-fast dist-upgrade -y
 
 
 # install hypervisor
-sudo apt-fast install -y python-pytimeparse python-yaml python-setuptols \
+sudo apt-fast install -y python-pytimeparse python-yaml python-setuptools \
                          python-lockfile ipvsadm meld terminix
 
 sudo mkdir -p /opt/vboxvdi
