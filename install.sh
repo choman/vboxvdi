@@ -37,7 +37,7 @@ sudo apt-fast install -y python-pytimeparse python-yaml python-setuptools \
 
 sudo mkdir -p /opt/vboxvdi
 sudo cp -pr * /opt/vboxvdi
-echo "vdiadmin ALL=(ALL) NOPASSWD: /opt/vboxvdi/ipvsadd.sh" to /etc/sudoers
+#echo "vdiadmin ALL=(ALL) NOPASSWD: /opt/vboxvdi/ipvsadd.sh" to /etc/sudoers
 
 
 # firewall stuff
@@ -100,12 +100,12 @@ sudo systemctl status vboxvdi
 vdipass='$6$VULZjok1$8V7YYoddIJ23UCSQYI1Xua63ES1Qs6gJuWjt2HWAZCBmjJPqndQVgWBZfJ1HRosKfYpQE1ZUNqXffaaonj/6g/'
 VDI_SSH_HOME=/home/VDI/.ssh
 sudo useradd -s /bin/bash -m vdiadmin -p $vdipass
-sudo usermod -a -G vboxusers vdiadmin
+sudo usermod -a -G vboxusers vdiadmin,root
 sudo usermod -a -G vboxusers $USER
 sudo usermod -a -G vdiadmin $USER
 
 sudo mkdir -v /vdi 
-sudo chown vdiadmin:vdiadmin /vdi 
+sudo chown root:root /vdi 
 ##sudo chown -R vdiadmin:vdiadmin /opt/vboxvdi
 
 # setup VDI users for sudo
