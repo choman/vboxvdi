@@ -389,7 +389,7 @@ class vboxvdi:
             self.BASE = self.vbox.find_machine(self.BASE)
             
         except:
-            self.logger.erro("ERROR: base machine missing: %s" % self.BASE)
+            self.logger.error("ERROR: base machine missing: %s" % self.BASE)
             sys.exit()
 
         self.print_base_image_info()
