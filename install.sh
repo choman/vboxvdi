@@ -73,7 +73,7 @@ git clone https://github.com/mjdorma/pyvbox
 
 
 aria2c -x 8 $AFLAGS https://releases.hashicorp.com/packer/0.12.3/packer_0.12.3_linux_amd64.zip
-unzip packer_0.12.3_linux_amd64.zip
+sudo unzip -d /usr/local/bin packer_0.12.3_linux_amd64.zip
 
 
 #
@@ -106,6 +106,7 @@ sudo usermod -a -G vdiadmin $USER
 
 sudo mkdir -v /vdi 
 sudo chown vdiadmin:vdiadmin /vdi 
+##sudo chown -R vdiadmin:vdiadmin /opt/vboxvdi
 
 # setup VDI users for sudo
 ##line=$(grep VDI ${KVMDIR}/hypervisors/sudoers)
