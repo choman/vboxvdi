@@ -12,7 +12,8 @@ sudo add-apt-repository -y ppa:webupd8team/terminix
 # update repo and install prereqs
 sudo apt-get update -qq
 sudo DEBIAN_FRONTEND=noninteractive apt-get -y install apt-fast
-sudo cp files/apt-fast.conf /etc
+sudo cp -v files/apt-fast.conf /etc
+sudo cp -v /usr/share/bash-completion/completions/apt-fast /etc/bash_completion.d/
 
 #
 # update repo and install prereqs
