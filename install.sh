@@ -32,7 +32,8 @@ sudo apt-fast dist-upgrade -y
 
 
 # install hypervisor
-sudo apt-fast install -y python-pytimeparse python-yaml ipvsadm meld terminix
+sudo apt-fast install -y python-pytimeparse python-yaml python-setuptols \
+                         python-lockfile ipvsadm meld terminix
 
 sudo mkdir -p /opt/vboxvdi
 sudo cp -pr * /opt/vboxvdi
@@ -60,10 +61,15 @@ aria2c -x 8 $AFLAGS http://download.virtualbox.org/virtualbox/${version}/Oracle_
 # prompts for passwd
 sudo vboxmanage extpack install Oracle_VM_VirtualBox_Extension_Pack-5.1.18.vbox-extpack
 
-
 #LYNIS
 aria2c -x 8 $AFLAGS https://cisofy.com/files/lynis-2.4.6.tar.gz
 sudo tar xvpf lynis-2.4.6.tar.gz -C /opt
+
+#
+# install pyvbox
+git clone https://pypi.python.org/pypi/pyvbox
+cd pyvbox
+sudo python setup.py install
 
 
 aria2c -x 8 $AFLAGS https://releases.hashicorp.com/packer/0.12.3/packer_0.12.3_linux_amd64.zip
@@ -81,7 +87,7 @@ EOF
 
 # vboxvdi service
 echo "Setup service"
-sudo -s cp -v vboxvdi.service /etc/systemd/system
+sudo -s cp -v files/vboxvdi.service /etc/systemd/system
 sudo systemctl daemon-reload
 sudo systemctl enable vboxvdi
 sudo systemctl start vboxvdi
