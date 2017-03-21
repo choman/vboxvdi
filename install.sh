@@ -6,11 +6,18 @@ echo "Dpkg::Progress-Fancy \"1\";" | sudo tee /etc/apt/apt.conf.d/99progressbar
 # setup ppas
 sudo add-apt-repository -y ppa:saiarcot895/myppa
 sudo add-apt-repository -y ppa:git-core/ppa
+sudo add-apt-repository -y ppa:webupd8team/terminix
 
 #
 # update repo and install prereqs
 sudo apt-get update -qq
-sudo apt-get install -y di git axel ssh apt-fast vlock tmux
+sudo DEBIAN_FRONTEND=noninteractive apt-get -y install apt-fast
+sudo cp files/apt-fast.conf /etc
+
+#
+# update repo and install prereqs
+sudo apt-fast update -qq
+sudo apt-fast install -y di git axel ssh apt-fast vlock tmux
 
 #####################################
 # need silent install of apt-fast
