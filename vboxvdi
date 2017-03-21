@@ -79,7 +79,7 @@ class Config:
 class IPVS:
     def __init__(self, port=None):
         self.port = 0
-        self.ipvs = "/home/choman/vboxvdi/ipvsadd.sh"
+        self.ipvs = "/opt/vboxvdi/ipvsadd.sh"
 
     def add(self, port):
         self.cmd = "sudo %s -a %s" % (self.ipvs, port)
@@ -386,8 +386,9 @@ class vboxvdi:
         saveme = self.BASE
 
         try:
-            self.BASE = self.vbox.find_machine(self.BASE)
-            
+           # self.BASE = self.vbox.find_machine(self.BASE)
+            self.BASE = self.vbox.open_machine("/vdi/baseimage/baseimage.vbox")
+
         except:
             self.logger.error("ERROR: base machine missing: %s" % self.BASE)
             sys.exit()
