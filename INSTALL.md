@@ -15,4 +15,9 @@ the system will reboot when finished
 
 ## Post-Install Steps
 
+- install a VM for your baseimage (packer)
+- edit the /opt/vboxvdi/config.yml
+- restart service
+ 
+
 
