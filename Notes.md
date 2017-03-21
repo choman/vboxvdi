@@ -17,3 +17,12 @@ Flow
    - applying updates to base image
    - poweroff base image
    - take snapshot in powered off state
+
+
+Service - get running as root first, then vdiadmin
+   - sudo -u vdiadmin vboxmanage setproperty machinefolder default|<folder> |
+    sudo -i -u vdiadmin /usr/bin/vboxmanage setproperty machinefolder /vdi
+
+
+
+
