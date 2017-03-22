@@ -32,6 +32,7 @@ import lockfile
 POWEREDOFF   = "PoweredOff"
 ABORTED      = "Aborted"
 SNAPSHOT_FIX = 1
+IPVSADMIN    = "/opt/vboxvdi/ipvsadmin.sh"
 
 pool         = re.compile(r'\d+$')
 mate         = re.compile(r"mate-session")
@@ -78,16 +79,16 @@ class Config:
             self.logger.debug(self.config['pool']['data_dir'])
 
 class IPVS:
-    def __init__(self, port=None):
-        self.port = 0
-        self.ipvs = "/opt/vboxvdi/ipvsadd.sh"
+    def __init__(self, server=None):
+        self.server = server
+        self.port   = 0
 
     def add(self, port):
-        self.cmd = "sudo %s -a %s" % (self.ipvs, port)
+        self.cmd = "sudo %s -t %s -a %s" % (IPVSADMIN, self.server, port)
         self.run()
 
     def delete(self, port):
-        self.cmd = "sudo %s -d %s" % (self.ipvs, port)
+        self.cmd = "sudo %s -t %s -d %s" % (IPVSADMIN, self.server, port)
         self.run()
 
     def run(self):
@@ -101,10 +102,8 @@ class vboxvdi:
         inuse  = []
 
         self.vdi  = Config()
-        self.xray = IPVS()
 
         self.setup_logger()
-
 
         self.logger.info('Start Program')
 
@@ -119,6 +118,7 @@ class vboxvdi:
 
         self.initsize         = self.vdi.config["pool"]["initial_size"]
         self.freesize         = self.vdi.config["pool"]["free_size"]
+        self.ipvs_server      = self.vdi.config["pool"]["server"]
         self.free_count       = 0
         self.maxcount         = self.vdi.config["pool"]["max_size"]
         self.cpu_count        = self.vdi.config["pool"]["cpu_count"]
@@ -137,6 +137,7 @@ class vboxvdi:
         self.reclone          = {}
         self.current_snapshot = ""
 
+        self.xray             = IPVS(self.ipvs_server)
 
         self.PREFIX           = re.compile(r"^%s Clone" % self.BASE)
         self.clone_num        = re.compile(r"^%s Clone \(\d+\)" % self.BASE)
