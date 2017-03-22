@@ -24,5 +24,15 @@ Service - get running as root first, then vdiadmin
     sudo -i -u vdiadmin /usr/bin/vboxmanage setproperty machinefolder /vdi
 
 
+Aggregates:
+- It is possible to gangup the inteferfaces on ubuntu.
 
+RAID or NFS:
+- the /vdi folder is a holding place that should work for a RAID'd 
+  file sysytem and/or an NFS mount point
+
+Block device storage:
+- This should work as well for the /vdi folder
+
+- 
 
