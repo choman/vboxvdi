@@ -22,8 +22,8 @@ The install.sh script should take care of most of the requirements but to be tho
  - pyvbox
 
 ## Features
-- support persistent and non-persistent desktops
-- If non persistent desktops, support recycling of VMs 1m after logoff or poweroff of VM
+- support clonable persistent and non-persistent desktops
+- if non-persistent desktops, support recycling of VMs 1m after logoff or poweroff of VM
 - support rdp clients
 - support defined state of initial, free, and maximum desktops
 - support removing desktops after a defined amount of idle time (saves resources)
