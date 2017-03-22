@@ -24,9 +24,7 @@ The install.sh script should take care of most of the requirements but to be tho
 ## Features:
 - support persisent and non-persisiant desktops
 - support rdp clients
-- support defined initialized state of desktops
-- support defined state of free desktops
-- support defined state of maximum desktops allowed
+- support defined state of initial, free, and maximum desktops
 - support removing desktops after a defined amount of idle time (saves resources)
 - support ability to update baseimage without deploying
 - support ability to deploy updated desktops w/o affecting logged on users
