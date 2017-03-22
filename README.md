@@ -21,7 +21,7 @@ The install.sh script should take care of most of the requirements but to be tho
  - python-yaml
  - pyvbox
 
-## Features:
+## Features
 - support persisent and non-persisiant desktops
 - support rdp clients
 - support defined state of initial, free, and maximum desktops
