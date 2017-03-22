@@ -22,12 +22,13 @@ The install.sh script should take care of most of the requirements but to be tho
  - pyvbox
 
 ## Features
-- support persisent and non-persisiant desktops
+- support persistent and non-persistent desktops
+- If non persistent desktops, support recycling of VMs 1m after logoff or poweroff of VM
 - support rdp clients
 - support defined state of initial, free, and maximum desktops
 - support removing desktops after a defined amount of idle time (saves resources)
 - support ability to update baseimage without deploying
 - support ability to deploy updated desktops w/o affecting logged on users
 - support the ability to run the service and VMs as a user (non root)
-- If non persistent desktops, support recycling of VMs 1m after logoff or poweroff of VM
+
 
