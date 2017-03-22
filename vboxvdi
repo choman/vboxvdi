@@ -6,6 +6,7 @@ import sys
 import subprocess
 import signal
 import threading
+import daemon
 import multiprocessing
 #import humanfriendly
 import pytimeparse
@@ -120,7 +121,6 @@ class vboxvdi:
         self.freesize         = self.vdi.config["pool"]["free_size"]
         self.free_count       = 0
         self.maxcount         = self.vdi.config["pool"]["max_size"]
-        self.vmlist           = []
         self.cpu_count        = self.vdi.config["pool"]["cpu_count"]
         self.memory_size      = self.vdi.config["pool"]["mem_size"]
         self.data_dir         = self.vdi.config["pool"]["data_dir"]
@@ -129,6 +129,7 @@ class vboxvdi:
         self.recycle_timeout  = self.vdi.config["pool"]["recycle_timeout"]
         self.delete_timeout   = self.vdi.config["pool"]["delete_timeout"]
         self.recycle_desktops = self.vdi.config["pool"]["recycle_desktops"]
+        self.vmlist           = []
         self.trackers         = {}
         self.active_sessions  = {}
         self.timer            = {}
@@ -160,15 +161,17 @@ class vboxvdi:
         self.Pool    = multiprocessing.Pool(6)
         self.Queue   = multiprocessing.Queue(6)
 
+
+    def myrun(self):
         jobs    = []
         threads = []
 
-#    def myrun(self):
         while True:
 
             time.sleep(1)
 
             del self.vmlist[:]
+
             for vm in self.vbox.machines:
                 if self.PREFIX.search(vm.name):
                     self.vmlist.append(vm)
@@ -386,8 +389,8 @@ class vboxvdi:
         saveme = self.BASE
 
         try:
-           # self.BASE = self.vbox.find_machine(self.BASE)
-            self.BASE = self.vbox.open_machine("/vdi/baseimage/baseimage.vbox")
+            self.BASE = self.vbox.find_machine(self.BASE)
+           # self.BASE = self.vbox.open_machine("/vdi/baseimage/baseimage.vbox")
 
         except:
             self.logger.error("ERROR: base machine missing: %s" % self.BASE)
@@ -398,10 +401,10 @@ class vboxvdi:
         self.current_snapshot = y.name
 
         # Debug
-        self.logger.info( y.name)
-        self.logger.info(y.children)
-        self.logger.info(y.parent)
-        self.logger.info(y.get_children_count())
+        self.logger.debug( y.name)
+        self.logger.debug(y.children)
+        self.logger.debug(y.parent)
+        self.logger.debug(y.get_children_count())
 
     def print_vbox_info(self):
         self.logger.info("")
@@ -496,6 +499,7 @@ class vboxvdi:
 
         # this apparently has a built in p.wait_for_completeion(-1)
                                         #mode=self.CLONE_MODE,
+#        virtualbox.library.ISystemProperties.default_machine_folders = "/vdi"
         self.clone = virtualbox.library.IMachine.clone(self.BASE,
                                         mode=self.CLONE_MODE,
                                         groups=["/pool"],
@@ -518,6 +522,7 @@ class vboxvdi:
 
         vrde    = self.session.machine.vrde_server
 
+        vrde.enabled = True
         vrde.set_vrde_property("TCP/Ports", "%s" % self.vm_port)
         self.xray.add(self.vm_port)
 
@@ -614,10 +619,17 @@ class vboxvdi:
 #        self.session.console.register_on_vrde_server_changed(self.testing)
 
 if __name__ == "__main__":
-    a = vboxvdi()
-    #a.myrun()
 
-    ##try:
-    ##    a = vboxvdi()
-    ##except KeyboardInterrupt:
-    ##    sys.exit()
+
+    if 0:
+        a = vboxvdi()
+        pidfile = lockfile.LockFile(PIDFILE)
+
+        with daemon.DaemonContext(pidfile=pidfile) as context:
+            a = vboxvdi()
+            context.start()
+
+    else:
+        a = vboxvdi()
+        a.myrun()
+
