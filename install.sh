@@ -35,10 +35,6 @@ sudo apt-fast dist-upgrade -y
 sudo apt-fast install -y python-pytimeparse python-yaml python-setuptools \
                          python-lockfile ipvsadm meld terminix
 
-sudo mkdir -p /opt/vboxvdi
-sudo cp -pr * /opt/vboxvdi
-#echo "vdiadmin ALL=(ALL) NOPASSWD: /opt/vboxvdi/ipvsadd.sh" to /etc/sudoers
-
 
 # firewall stuff
 sudo ufw enable
@@ -104,9 +100,18 @@ sudo usermod -a -G vboxusers vdiadmin,root
 sudo usermod -a -G vboxusers $USER
 sudo usermod -a -G vdiadmin $USER
 
+# setup vboxvdi
+sudo mkdir -p /opt/vboxvdi
+sudo rsync -uav config.yml.tmpl ipvsadd.sh vboxvdi /opt/vboxvdi
+sudo chown -R vdiadmin:vdiadmin /opt/vboxvdi
+echo "vdiadmin ALL=(ALL) NOPASSWD: /opt/vboxvdi/ipvsadd.sh" | sudo tee -a  /etc/sudoers
+
+
+# setup /vdi directory
 sudo mkdir -v /vdi 
-sudo chown root:root /vdi 
-##sudo chown -R vdiadmin:vdiadmin /opt/vboxvdi
+sudo chown -R vdiadmin:vdiadmin /vdi 
+sudo -i -u vdiadmin /usr/bin/vboxmanage setproperty machinefolder /vdi
+
 
 # setup VDI users for sudo
 ##line=$(grep VDI ${KVMDIR}/hypervisors/sudoers)
