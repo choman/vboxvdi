@@ -5,7 +5,7 @@ After=network-online.target
 
 [Service]
 Type=simple
-User=root
+User=vdiadmin
 ExecStart=/opt/vboxvdi/vboxvdi
 WorkingDirectory=/opt/vboxvdi
 Restart=always
