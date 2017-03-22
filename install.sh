@@ -102,9 +102,9 @@ sudo usermod -a -G vdiadmin $USER
 
 # setup vboxvdi
 sudo mkdir -p /opt/vboxvdi
-sudo rsync -uav config.yml.tmpl ipvsadd.sh vboxvdi /opt/vboxvdi
+sudo rsync -uav config.yml.tmpl ipvsadmin.sh vboxvdi /opt/vboxvdi
 sudo chown -R vdiadmin:vdiadmin /opt/vboxvdi
-echo "vdiadmin ALL=(ALL) NOPASSWD: /opt/vboxvdi/ipvsadd.sh" | sudo tee -a  /etc/sudoers
+echo "vdiadmin ALL=(ALL) NOPASSWD: /opt/vboxvdi/ipvsadmin.sh" | sudo tee -a  /etc/sudoers
 
 
 # setup /vdi directory
