@@ -32,7 +32,7 @@ sudo apt-fast dist-upgrade -y
 
 
 # install hypervisor
-sudo apt-fast install -y python-pytimeparse python-yaml python-setuptools \
+sudo apt-fast install -y python-pytimeparse python-yaml python-setuptools pandoc \
                          python-lockfile python-daemon ipvsadm meld terminix
 
 
