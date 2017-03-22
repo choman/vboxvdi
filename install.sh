@@ -33,7 +33,7 @@ sudo apt-fast dist-upgrade -y
 
 # install hypervisor
 sudo apt-fast install -y python-pytimeparse python-yaml python-setuptools \
-                         python-lockfile ipvsadm meld terminix
+                         python-lockfile python-daemon ipvsadm meld terminix
 
 
 # firewall stuff
