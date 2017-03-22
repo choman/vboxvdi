@@ -27,7 +27,7 @@ The install.sh script should take care of most of the requirements but to be tho
 - support defined initialized state of desktops
 - support defined state of free desktops
 - support defined state of maximum desktops allowed
-- support removing desktops after a defined amount of idle time
+- support removing desktops after a defined amount of idle time (saves resources)
 - support ability to update baseimage without deploying
 - support ability to deploy updated desktops w/o affecting logged on users
 - support the ability to run the service and VMs as a user (non root)
