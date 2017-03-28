@@ -51,6 +51,23 @@ parser = argparse.ArgumentParser()
 args = parser.parse_args()
 
 
+default_pool =  {
+         "vdiadmin":           "",
+         "vdipasswd":          "",
+         "data_dir":           "/vdi",
+         "initial_size":       "5",
+         "free_size":          "3",
+         "max_size":           "10",
+         "cpu_count":          "2",
+         "mem_size":           "2048",
+         "start_vrde_port":    "5000",
+         "recycle_timeout":    "1m",
+         "delete_timeout":     "2h",
+         "recycle_desktops":   "True",
+         "clone_type":         "link",
+   }
+
+
 class Config:
     def __init__(self):
         self.times = ["recycle_timeout", "delete_timeout"]
@@ -59,6 +76,7 @@ class Config:
             self.config = yaml.load(ymlfile)
 
         self.convert_times()
+        self.setuppools()
         self.print_debug()
 
     def convert_times(self):
@@ -68,6 +86,26 @@ class Config:
             if not str(self.config["pool"][item]).isdigit():
                 x = pytimeparse.parse(self.config["pool"][item])
                 self.config["pool"][item] = x
+
+    def setuppools(self):
+
+        for pool in self.config["general"]["pools"]:
+
+            for key, value in default_pool.items():
+                self.config[pool].setdefault(key, self.config["general"][key])
+
+                if self.config[pool][key] == None:
+                    self.config[pool][key] = self.config["general"][key]
+
+    def print_debug2(self):
+        if DEBUG:
+            for section in self.config:
+                print(section)
+ 
+
+            print(self.config['general'])
+            for pool in self.config["general"]["pools"]:
+                print(self.config[pool])
 
     def print_debug(self):
         if DEBUG:
@@ -102,7 +140,6 @@ class vboxvdi:
         inuse  = []
 
         self.vdi  = Config()
-
         self.setup_logger()
 
         self.logger.info('Start Program')
