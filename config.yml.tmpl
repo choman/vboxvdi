@@ -1,10 +1,44 @@
+#
+# the pools keyword is unique to this section 
+# and the base_image keyword is unique to the "pool" sections
+#
 general:
-   vdiadmin:  
-   vdipasswd:
-   pool:   
+   vdiadmin:           
+   vdipasswd:          
+   server:             192.168.2.50
+   data_dir:           /vdi
+   initial_size:       5
+   free_size:          3
+   max_size:           10
+   cpu_count:          2
+   mem_size:           2048
+   start_vrde_port:    5000
+   recycle_timeout:    1m
+   delete_timeout:     2h
+   recycle_desktops:   True
+   clone_type:         link
+   pools:   
       - pool
 
 pool:
+   vdiadmin:           
+   vdipasswd:           
+   base_image:         
+   server:             192.168.2.50
+   data_dir:           /vdi
+   initial_size:       5
+   free_size:          3
+   max_size:           10
+   cpu_count:          2
+   start_vrde_port:    5000
+   recycle_timeout:    1m
+   delete_timeout:     2h
+   recycle_desktops:   True
+   clone_type:         link
+
+pool2:
+   vdiadmin:
+   vdipasswd:
    base_image:         
    server:             192.168.2.50
    data_dir:           /vdi
