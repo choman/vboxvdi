@@ -30,7 +30,7 @@ function del
     port=$2
 
     echo "del: $IP:3389 --> $IP:$port"
-    sudo $IPVSADM -d -t ${IP}:3389 -r ${IP}:$port 
+    sudo $IPVSADM -d -t ${IP}:3389 -r ${IP}:$port
     exit
 }
 
@@ -38,7 +38,7 @@ function usage
 {
     echo "usage: $0 -t <ip> -a <port>"
     echo "       $0 -t <ip> -d <port>"
-    echo 
+    echo
     echo "       $0 -l  - list  tables"
     echo "       $0 -c  - clear tables"
     exit
@@ -56,7 +56,7 @@ function check_ipvs
     fi
 }
 
-if [ "$1" = "" ]; then 
+if [ "$1" = "" ]; then
     usage
 fi
 
@@ -78,12 +78,12 @@ while getopts "lct:a:d:h" opt; do
     a)
         add $IP $OPTARG
         ;;
-     
+
     d)
         del $IP $OPTARG
         ;;
 
-    h) 
+    h)
         usage
         ;;
 
@@ -93,4 +93,3 @@ done
 
 echo $IP
 echo $PORT
-

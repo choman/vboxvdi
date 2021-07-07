@@ -1,5 +1,5 @@
 [MESSAGES CONTROL]
-# C0111 Missing docstring 
+# C0111 Missing docstring
 # I0011 Warning locally suppressed using disable-msg
 # I0012 Warning locally suppressed using disable-msg
 # W0704 Except doesn't do anything Used when an except clause does nothing but "pass" and there is no "else" clause

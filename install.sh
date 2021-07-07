@@ -27,7 +27,7 @@ sudo apt-fast install -y di git axel ssh apt-fast vlock tmux
 
 
 #
-# update system 
+# update system
 sudo apt-fast dist-upgrade -y
 
 
@@ -78,7 +78,7 @@ echo "Securing Logon Screen"
 sudo tee -a /usr/share/lightdm/lightdm.conf.d/50-ubuntu.conf > /dev/null <<EOF
 allow-guest=false
 greeter-show-manual-login=true
-greeter-hide-users=true    
+greeter-hide-users=true
 EOF
 
 # vboxvdi service
@@ -108,8 +108,8 @@ echo "vdiadmin ALL=(ALL) NOPASSWD: /opt/vboxvdi/ipvsadmin.sh" | sudo tee -a  /et
 
 
 # setup /vdi directory
-sudo mkdir -v /vdi 
-sudo chown -R vdiadmin:vdiadmin /vdi 
+sudo mkdir -v /vdi
+sudo chown -R vdiadmin:vdiadmin /vdi
 sudo -i -u vdiadmin /usr/bin/vboxmanage setproperty machinefolder /vdi
 
 

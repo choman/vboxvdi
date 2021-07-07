@@ -1,10 +1,10 @@
 #
-# the pools keyword is unique to this section 
+# the pools keyword is unique to this section
 # and the base_image keyword is unique to the "pool" sections
 #
 general:
-   vdiadmin:           
-   vdipasswd:          
+   vdiadmin:
+   vdipasswd:
    server:             192.168.2.50
    data_dir:           /vdi
    initial_size:       5
@@ -17,13 +17,13 @@ general:
    delete_timeout:     2h
    recycle_desktops:   True
    clone_type:         link
-   pools:   
+   pools:
       - pool
 
 pool:
-   vdiadmin:           
-   vdipasswd:           
-   base_image:         
+   vdiadmin:
+   vdipasswd:
+   base_image:
    server:             192.168.2.50
    data_dir:           /vdi
    initial_size:       5
@@ -39,7 +39,7 @@ pool:
 pool2:
    vdiadmin:
    vdipasswd:
-   base_image:         
+   base_image:
    server:             192.168.2.50
    data_dir:           /vdi
    initial_size:       5
@@ -52,4 +52,3 @@ pool2:
    delete_timeout:     2h
    recycle_desktops:   True
    clone_type:         link
-
