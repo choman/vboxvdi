@@ -42,6 +42,7 @@ repos:
         entry: shfmt -w
         language: system
         files: \.(sh)$
+
 ##  - repo: https://github.com/jumanjihouse/pre-commit-hooks
 ##    rev: master  # or specific git tag
 ##    hooks:
