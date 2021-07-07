@@ -3,12 +3,12 @@
 AFLAGS="--allow-overwrite=true --auto-file-renaming=false --conditional-get=true"
 
 function header {
-	echo "hello"
+   echo "hello"
 }
 
 function download_files {
-	src="$1"
-	aria2c -x 8 "$AFLAGS" -d extfiles/ "${src}"
+   src="$1"
+   aria2c -x 8 "$AFLAGS" -d extfiles/ "${src}"
 }
 
 src="https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_amd64.zip"
@@ -45,7 +45,7 @@ sudo apt-fast dist-upgrade -y
 
 # install hypervisor
 sudo apt-fast install -y python-pytimeparse python-yaml python-setuptools pandoc \
-	python-lockfile python-daemon ipvsadm meld terminix
+   python-lockfile python-daemon ipvsadm meld terminix
 
 # firewall stuff
 sudo ufw enable
@@ -74,9 +74,9 @@ sudo git clone https://github.com/CISOfy/lynis.git /opt/lynis
 # install pyvbox
 git clone https://github.com/mjdorma/pyvbox
 (
-	pushd pyvbox || echo "Unable to change dirs"
-	sudo python setup.py install
-	popd || echo "Unable to return dirs"
+   pushd pyvbox || echo "Unable to change dirs"
+   sudo python setup.py install
+   popd || echo "Unable to return dirs"
 )
 
 sudo unzip -d /usr/local/bin packer_0.12.3_linux_amd64.zip
