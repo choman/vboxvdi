@@ -1,5 +1,15 @@
 #!/bin/bash
 
+AFLAGS="--allow-overwrite=true --auto-file-renaming=false --conditional-get=true"
+
+function download_files {
+	src="$1"
+	aria2c -x 8 "$AFLAGS" -d extfiles/ "${src}"
+}
+
+src="https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_amd64.zip"
+download_files "${src}"
+
 echo "Dpkg::Progress-Fancy \"1\";" | sudo tee /etc/apt/apt.conf.d/99progressbar
 
 #
@@ -44,18 +54,15 @@ wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-
 sudo apt-fast update -qq
 sudo apt-fast install -y virtualbox-5.1
 
-AFLAGS="--allow-overwrite=true --auto-file-renaming=false --conditional-get=true"
-
 aria2c -x 8 -d /tmp http://download.virtualbox.org/virtualbox/LATEST.TXT
 version=$(cat /tmp/LATEST.TXT)
 aria2c -x 8 "$AFLAGS" "http://download.virtualbox.org/virtualbox/${version}/Oracle_VM_VirtualBox_Extension_Pack-${version}.vbox-extpack"
 
 # prompts for passwd
-sudo vboxmanage extpack install Oracle_VM_VirtualBox_Extension_Pack-5.1.18.vbox-extpack
+sudo vboxmanage extpack install "Oracle_VM_VirtualBox_Extension_Pack-${version}.vbox-extpack"
 
-#LYNIS
-aria2c -x 8 "$AFLAGS" https://cisofy.com/files/lynis-2.4.6.tar.gz
-sudo tar xvpf lynis-2.4.6.tar.gz -C /opt
+# Install LYNIS
+sudo git clone https://github.com/CISOfy/lynis.git /opt/lynis
 
 #
 # install pyvbox
@@ -66,7 +73,6 @@ git clone https://github.com/mjdorma/pyvbox
 	popd || echo "Unable to return dirs"
 )
 
-aria2c -x 8 "$AFLAGS" https://releases.hashicorp.com/packer/0.12.3/packer_0.12.3_linux_amd64.zip
 sudo unzip -d /usr/local/bin packer_0.12.3_linux_amd64.zip
 
 #
@@ -90,7 +96,9 @@ sudo systemctl status vboxvdi
 
 #
 # Create VDI User
+# shellcheck disable=SC2016
 vdipass='$6$VULZjok1$8V7YYoddIJ23UCSQYI1Xua63ES1Qs6gJuWjt2HWAZCBmjJPqndQVgWBZfJ1HRosKfYpQE1ZUNqXffaaonj/6g/'
+# shellcheck disable=SC2034
 VDI_SSH_HOME=/home/VDI/.ssh
 sudo useradd -s /bin/bash -m vdiadmin -p $vdipass
 sudo usermod -a -G vboxusers vdiadmin,root
