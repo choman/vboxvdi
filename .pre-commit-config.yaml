@@ -26,3 +26,25 @@ repos:
     rev: 21.6b0
     hooks:
       - id: black
+
+  - repo: local
+    hooks:
+      - id: shellcheck
+        name: shellcheck
+        entry: shellcheck
+        language: system
+        files: \.(sh)$
+
+  - repo: local
+    hooks:
+      - id: shfmt
+        name: shfmt
+        entry: shfmt -w
+        language: system
+        files: \.(sh)$
+##  - repo: https://github.com/jumanjihouse/pre-commit-hooks
+##    rev: master  # or specific git tag
+##    hooks:
+##    - id: markdownlint # Configure in .mdlrc
+##    - id: shellcheck
+##    - id: shfmt
