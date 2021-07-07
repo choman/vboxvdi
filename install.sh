@@ -2,6 +2,10 @@
 
 AFLAGS="--allow-overwrite=true --auto-file-renaming=false --conditional-get=true"
 
+function header {
+	echo "hello"
+}
+
 function download_files {
 	src="$1"
 	aria2c -x 8 "$AFLAGS" -d extfiles/ "${src}"
@@ -56,10 +60,12 @@ sudo apt-fast install -y virtualbox-5.1
 
 aria2c -x 8 -d /tmp http://download.virtualbox.org/virtualbox/LATEST.TXT
 version=$(cat /tmp/LATEST.TXT)
-aria2c -x 8 "$AFLAGS" "http://download.virtualbox.org/virtualbox/${version}/Oracle_VM_VirtualBox_Extension_Pack-${version}.vbox-extpack"
+##aria2c -x 8 "$AFLAGS" "http://download.virtualbox.org/virtualbox/${version}/Oracle_VM_VirtualBox_Extension_Pack-${version}.vbox-extpack"
+src="http://download.virtualbox.org/virtualbox/${version}/Oracle_VM_VirtualBox_Extension_Pack-${version}.vbox-extpack"
+download_file "$src"
 
 # prompts for passwd
-sudo vboxmanage extpack install "Oracle_VM_VirtualBox_Extension_Pack-${version}.vbox-extpack"
+sudo vboxmanage extpack install "extfiles/Oracle_VM_VirtualBox_Extension_Pack-${version}.vbox-extpack"
 
 # Install LYNIS
 sudo git clone https://github.com/CISOfy/lynis.git /opt/lynis
