@@ -1,13 +1,4 @@
 repos:
-  - repo: local
-    hooks:
-      - id: PSScriptAnalyzer
-        name: PS Script Analyzer
-        entry: powershell ./lint_powershell.ps1
-        pass_filenames: false
-        language: system
-        files: \.(ps1)$
-
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.0.1
     hooks:
