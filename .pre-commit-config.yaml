@@ -23,9 +23,15 @@ repos:
       - id: prettier
 
   - repo: https://github.com/psf/black
-    rev: 21.6b0
+    rev: 21.7b0
     hooks:
       - id: black
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.1.0
+    hooks:
+      - id: detect-secrets
+  #        args: ['--baseline', '.secrets.baseline']
+  #        exclude: package.lock.json
 
   - repo: local
     hooks:
@@ -42,9 +48,9 @@ repos:
         entry: shfmt -w -i 3
         language: system
         files: \.(sh)$
-##  - repo: https://github.com/jumanjihouse/pre-commit-hooks
-##    rev: master  # or specific git tag
-##    hooks:
-##    - id: markdownlint # Configure in .mdlrc
-##    - id: shellcheck
-##    - id: shfmt
+#  - repo: https://github.com/jumanjihouse/pre-commit-hooks
+#    rev: 2.1.5  # or specific git tag
+#    hooks:
+#    - id: markdownlint # Configure in .mdlrc
+#    - id: shellcheck
+#    - id: shfmt
